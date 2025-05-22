@@ -114,7 +114,7 @@ class ProfileHeaderView: UIView {
         statusTextFieldTopConstraint = statusTextField.topAnchor.constraint(equalTo: statusLabel.bottomAnchor, constant: 0)
         statusTextFieldTopConstraint.isActive = true
         
-        statusButtonTopConstraint = setStatusButton.topAnchor.constraint(equalTo: avatarImageView.bottomAnchor, constant: 16)
+        statusButtonTopConstraint = setStatusButton.topAnchor.constraint(equalTo: statusTextField.bottomAnchor, constant: 16)
         statusButtonTopConstraint.isActive = true
         
         NSLayoutConstraint.activate([
