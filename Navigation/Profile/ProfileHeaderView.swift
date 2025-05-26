@@ -49,7 +49,7 @@ class ProfileHeaderView: UIView {
         textField.layer.cornerRadius = 8
         textField.font = UIFont.systemFont(ofSize: 14)
         textField.translatesAutoresizingMaskIntoConstraints = false
-        textField.isHidden = true
+        textField.isHidden = false
         return textField
     }()
     
@@ -62,8 +62,6 @@ class ProfileHeaderView: UIView {
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
-    
-    private var isTextFieldVisible = false
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -86,65 +84,43 @@ class ProfileHeaderView: UIView {
         addSubview(setStatusButton)
         
         setStatusButton.addTarget(self, action: #selector(statusButtonTapped), for: .touchUpInside)
+        setStatusButton.layer.shadowColor = UIColor.black.cgColor
+        setStatusButton.layer.shadowOpacity = 0.25
+        setStatusButton.layer.shadowOffset = CGSize(width: 2, height: 2)
+        setStatusButton.layer.shadowRadius = 4
     }
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            avatarImageView.topAnchor.constraint(equalTo: topAnchor, constant: 16),
+            avatarImageView.topAnchor.constraint(equalTo: topAnchor, constant: 8),
             avatarImageView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             avatarImageView.widthAnchor.constraint(equalToConstant: 150),
             avatarImageView.heightAnchor.constraint(equalToConstant: 150),
             
-            fullNameLabel.topAnchor.constraint(equalTo: topAnchor, constant: 27),
+            fullNameLabel.topAnchor.constraint(equalTo: topAnchor, constant: 12),
             fullNameLabel.leadingAnchor.constraint(equalTo: avatarImageView.trailingAnchor, constant: 16),
             fullNameLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
             
-            statusLabel.bottomAnchor.constraint(equalTo: avatarImageView.bottomAnchor, constant: -16),
+            statusLabel.bottomAnchor.constraint(equalTo: avatarImageView.bottomAnchor, constant: -30),
             statusLabel.leadingAnchor.constraint(equalTo: fullNameLabel.leadingAnchor),
             statusLabel.trailingAnchor.constraint(equalTo: fullNameLabel.trailingAnchor),
             
             statusTextField.leadingAnchor.constraint(equalTo: fullNameLabel.leadingAnchor),
             statusTextField.trailingAnchor.constraint(equalTo: fullNameLabel.trailingAnchor),
+            statusTextField.topAnchor.constraint(equalTo: statusLabel.bottomAnchor, constant: 4),
             statusTextField.heightAnchor.constraint(equalToConstant: 36)
         ])
-        
-        statusTextFieldTopConstraint = statusTextField.topAnchor.constraint(equalTo: statusLabel.bottomAnchor, constant: 0)
-        statusTextFieldTopConstraint.isActive = true
-        
-        statusButtonTopConstraint = setStatusButton.topAnchor.constraint(equalTo: avatarImageView.bottomAnchor, constant: 16)
-        statusButtonTopConstraint.isActive = true
         
         NSLayoutConstraint.activate([
             setStatusButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             setStatusButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            setStatusButton.topAnchor.constraint(equalTo: statusTextField.bottomAnchor, constant: 4),
             setStatusButton.heightAnchor.constraint(equalToConstant: 44)
         ])
     }
     
     @objc private func statusButtonTapped() {
-        isTextFieldVisible.toggle()
-        
-        if isTextFieldVisible {
-            statusTextField.isHidden = false
-            statusTextFieldTopConstraint.constant = 16
-            statusButtonTopConstraint.isActive = false
-            statusButtonTopConstraint = setStatusButton.topAnchor.constraint(equalTo: statusTextField.bottomAnchor, constant: 16)
-            statusButtonTopConstraint.isActive = true
-            setStatusButton.setTitle("Get Status", for: .normal)
-            statusTextField.becomeFirstResponder()
-        } else {
             statusLabel.text = statusTextField.text?.isEmpty == false ? statusTextField.text : "Waiting for something..."
-            statusTextField.resignFirstResponder()
-            statusTextField.isHidden = true
-            statusTextFieldTopConstraint.constant = 0
-            statusButtonTopConstraint.isActive = false
-            statusButtonTopConstraint = setStatusButton.topAnchor.constraint(equalTo: avatarImageView.bottomAnchor, constant: 16)
-            statusButtonTopConstraint.isActive = true
-            setStatusButton.setTitle("Show Status", for: .normal)
-        }
-        
-        UIView.animate(withDuration: 0.3) {
-            self.layoutIfNeeded()
-        }
+
     }
 }
