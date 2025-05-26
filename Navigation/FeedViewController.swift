@@ -15,22 +15,39 @@ class FeedViewController: UIViewController {
         view.backgroundColor = .systemBackground
         title = "Лента"
         
-        let button = UIButton(type: .system)
-        button.setTitle("Перейти к посту", for: .normal)
-        button.addTarget(self, action: #selector(openPost), for: .touchUpInside)
+        let button1 = UIButton(type: .system)
+        button1.setTitle("Пост 1", for: .normal)
+        button1.addTarget(self, action: #selector(openPost1), for: .touchUpInside)
         
-        button.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(button)
+        let button2 = UIButton(type: .system)
+        button2.setTitle("Пост 2", for: .normal)
+        button2.addTarget(self, action: #selector(openPost2), for: .touchUpInside)
+        
+        let stackView = UIStackView(arrangedSubviews: [button1, button2])
+        stackView.axis = .vertical
+        stackView.spacing = 10
+        stackView.alignment = .center
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        view.addSubview(stackView)
         NSLayoutConstraint.activate([
-            button.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            button.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            stackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            stackView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
     }
-    @objc func openPost() {
-        let post = Post(title: "Пример поста")
+        
+    @objc func openPost1() {
+        let post = Post(title: "Пост №1")
+        let postVC = PostViewController(post: post)
+        navigationController?.pushViewController(postVC, animated: true)
+    }
+    
+    @objc func openPost2() {
+        let post = Post(title: "Пост №2")
         let postVC = PostViewController(post: post)
         navigationController?.pushViewController(postVC, animated: true)
     }
     
     
 }
+
