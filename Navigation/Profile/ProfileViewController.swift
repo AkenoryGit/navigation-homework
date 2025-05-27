@@ -10,13 +10,33 @@ import UIKit
 class ProfileViewController: UIViewController {
 
     private let profileHeaderView = ProfileHeaderView()
+    
+    private let bottomButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Tap Me", for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.backgroundColor = .systemGreen
+        button.layer.cornerRadius = 10
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         title = "Profile"
         view.backgroundColor = .systemBackground
+        
+        setupView()
+        setupConstraints()
+    }
+    
+    private func setupView() {
         view.addSubview(profileHeaderView)
+        view.addSubview(bottomButton)
+    }
+
+    private func setupConstraints() {
         profileHeaderView.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
@@ -24,15 +44,7 @@ class ProfileViewController: UIViewController {
             profileHeaderView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             profileHeaderView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             profileHeaderView.heightAnchor.constraint(equalToConstant: 220),
-        ])
-        let bottomButton = UIButton(type: .system)
-        bottomButton.setTitle("Tap Me", for: .normal)
-        bottomButton.backgroundColor = .systemGreen
-        bottomButton.setTitleColor(.white, for: .normal)
-        bottomButton.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(bottomButton)
 
-        NSLayoutConstraint.activate([
             bottomButton.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             bottomButton.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             bottomButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
