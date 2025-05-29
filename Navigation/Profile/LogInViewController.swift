@@ -29,14 +29,30 @@ class LogInViewController: UIViewController {
         return imageView
     }()
     
+    private lazy var textFieldStackView: UIStackView = {
+        let separator = UIView()
+        separator.backgroundColor = .lightGray
+        separator.heightAnchor.constraint(equalToConstant: 0.5).isActive = true
+        
+
+        let stackView = UIStackView(arrangedSubviews: [emailTextField, separator, passwordTextField])
+        stackView.axis = .vertical
+        stackView.spacing = 0
+        stackView.layer.cornerRadius = 10
+        stackView.layer.borderWidth = 0.5
+        stackView.layer.borderColor = UIColor.lightGray.cgColor
+        stackView.clipsToBounds = true
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.backgroundColor = .systemGray6
+        return stackView
+    }()
+    
     private let emailTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Email or phone"
-        textField.backgroundColor = .systemGray6
-        textField.layer.borderColor = UIColor.lightGray.cgColor
-        textField.layer.borderWidth = 0.5
-        textField.layer.cornerRadius = 10
         textField.font = UIFont.systemFont(ofSize: 16)
+        textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 0))
+        textField.leftViewMode = .always
         textField.textColor = .black
         textField.autocapitalizationType = .none
         textField.translatesAutoresizingMaskIntoConstraints = false
@@ -46,11 +62,9 @@ class LogInViewController: UIViewController {
     private let passwordTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Password"
-        textField.backgroundColor = .systemGray6
-        textField.layer.borderColor = UIColor.lightGray.cgColor
-        textField.layer.borderWidth = 0.5
-        textField.layer.cornerRadius = 10
         textField.font = UIFont.systemFont(ofSize: 16)
+        textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 0))
+        textField.leftViewMode = .always
         textField.textColor = .black
         textField.isSecureTextEntry = true
         textField.translatesAutoresizingMaskIntoConstraints = false
@@ -116,8 +130,7 @@ class LogInViewController: UIViewController {
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
         contentView.addSubview(logoImageView)
-        contentView.addSubview(emailTextField)
-        contentView.addSubview(passwordTextField)
+        contentView.addSubview(textFieldStackView)
         contentView.addSubview(logInButton)
     }
 
@@ -143,19 +156,19 @@ class LogInViewController: UIViewController {
         ])
         
         NSLayoutConstraint.activate([
-            emailTextField.topAnchor.constraint(equalTo: logoImageView.bottomAnchor, constant: 120),
-            emailTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            emailTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            textFieldStackView.topAnchor.constraint(equalTo: logoImageView.bottomAnchor, constant: 120),
+            textFieldStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            textFieldStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            textFieldStackView.heightAnchor.constraint(equalToConstant: 101)
+        ])
+        
+        NSLayoutConstraint.activate([
             emailTextField.heightAnchor.constraint(equalToConstant: 50),
-            
-            passwordTextField.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: 16),
-            passwordTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            passwordTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             passwordTextField.heightAnchor.constraint(equalToConstant: 50)
         ])
         
         NSLayoutConstraint.activate([
-            logInButton.topAnchor.constraint(equalTo: passwordTextField.bottomAnchor, constant: 16),
+            logInButton.topAnchor.constraint(equalTo: textFieldStackView.bottomAnchor, constant: 16),
             logInButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             logInButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             logInButton.heightAnchor.constraint(equalToConstant: 50),
