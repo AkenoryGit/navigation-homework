@@ -8,47 +8,76 @@
 import UIKit
 
 class ProfileViewController: UIViewController {
-
-    private let profileHeaderView = ProfileHeaderView()
     
-    private let bottomButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("Tap Me", for: .normal)
-        button.setTitleColor(.white, for: .normal)
-        button.backgroundColor = .systemGreen
-        button.layer.cornerRadius = 10
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
-    }()
-
+    private let tableView = UITableView()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
         title = "Profile"
         view.backgroundColor = .systemBackground
-        
-        setupView()
-        setupConstraints()
+        setupTableView()
     }
     
-    private func setupView() {
-        view.addSubview(profileHeaderView)
-        view.addSubview(bottomButton)
-    }
+    private func setupTableView() {
+        view.addSubview(tableView)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
 
-    private func setupConstraints() {
-        profileHeaderView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.delegate = self
+        tableView.dataSource = self
+        
+        tableView.register(PostTableViewCell.self, forCellReuseIdentifier: "PostCell")
+        tableView.estimatedRowHeight = 300
+        tableView.rowHeight = UITableView.automaticDimension
+
+        let headerView = ProfileHeaderView()
+        
+        headerView.frame.size.width = tableView.bounds.width
+
+        let targetSize = CGSize(width: tableView.bounds.width, height: UIView.layoutFittingCompressedSize.height)
+        let height = headerView.systemLayoutSizeFitting(targetSize).height
+
+        headerView.frame = CGRect(x: 0, y: 0, width: tableView.bounds.width, height: height)
+
+        tableView.tableHeaderView = headerView
 
         NSLayoutConstraint.activate([
-            profileHeaderView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            profileHeaderView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            profileHeaderView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            profileHeaderView.heightAnchor.constraint(equalToConstant: 220),
-
-            bottomButton.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            bottomButton.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            bottomButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            bottomButton.heightAnchor.constraint(equalToConstant: 50)
+            tableView.topAnchor.constraint(equalTo: view.topAnchor),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        if let headerView = tableView.tableHeaderView {
+            let targetSize = CGSize(width: tableView.bounds.width, height: UIView.layoutFittingCompressedSize.height)
+            let height = headerView.systemLayoutSizeFitting(targetSize).height
+            
+            if headerView.frame.height != height {
+                headerView.frame.size.height = height
+                tableView.tableHeaderView = headerView
+            }
+        }
+    }
 }
+
+extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 1
+    }
+
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return posts.count
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "PostCell", for: indexPath) as? PostTableViewCell else {
+            return UITableViewCell()
+        }
+        cell.configure(with: posts[indexPath.row])
+        return cell
+    }
+}
+
