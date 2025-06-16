@@ -9,6 +9,19 @@ import UIKit
 
 class ProfileHeaderView: UIView {
     
+    var onAvatarTap: (() -> Void)?
+    var avatarImage: UIImage? {
+        return avatarImageView.image
+    }
+
+    var avatarFrame: CGRect {
+        return avatarImageView.frame
+    }
+
+    var avatarCornerRadius: CGFloat {
+        return avatarImageView.layer.cornerRadius
+    }
+    
     private var statusTextFieldTopConstraint: NSLayoutConstraint!
     private var statusButtonTopConstraint: NSLayoutConstraint!
     
@@ -66,13 +79,21 @@ class ProfileHeaderView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupView()
+        setupGesture()
         setupConstraints()
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         setupView()
+        setupGesture()
         setupConstraints()
+    }
+    
+    private func setupGesture() {
+        avatarImageView.isUserInteractionEnabled = true
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(avatarTapped))
+        avatarImageView.addGestureRecognizer(tapGesture)
     }
     
     private func setupView() {
@@ -108,19 +129,22 @@ class ProfileHeaderView: UIView {
             statusTextField.leadingAnchor.constraint(equalTo: fullNameLabel.leadingAnchor),
             statusTextField.trailingAnchor.constraint(equalTo: fullNameLabel.trailingAnchor),
             statusTextField.topAnchor.constraint(equalTo: statusLabel.bottomAnchor, constant: 4),
-            statusTextField.heightAnchor.constraint(equalToConstant: 36)
-        ])
-        
-        NSLayoutConstraint.activate([
+            statusTextField.heightAnchor.constraint(equalToConstant: 36),
+
             setStatusButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             setStatusButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
             setStatusButton.topAnchor.constraint(equalTo: statusTextField.bottomAnchor, constant: 4),
-            setStatusButton.heightAnchor.constraint(equalToConstant: 44)
+            setStatusButton.heightAnchor.constraint(equalToConstant: 44),
+            setStatusButton.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16)
         ])
     }
     
     @objc private func statusButtonTapped() {
             statusLabel.text = statusTextField.text?.isEmpty == false ? statusTextField.text : "Waiting for something..."
-
+    }
+    
+    @objc private func avatarTapped() {
+        print("Аватар нажат")
+        onAvatarTap?()
     }
 }
