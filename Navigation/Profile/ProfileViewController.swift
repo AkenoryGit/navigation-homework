@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import StorageService
 
 class ProfileViewController: UIViewController {
     
@@ -35,8 +36,14 @@ class ProfileViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+#if DEBUG
+        view.backgroundColor = .systemRed
+#else
+        view.backgroundColor = .systemGreen
+#endif
+        
         title = "Profile"
-        view.backgroundColor = .systemBackground
         setupTableView()
         
         view.addSubview(overlayView)
