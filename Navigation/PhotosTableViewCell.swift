@@ -23,7 +23,7 @@ final class PhotosTableViewCell: UITableViewCell {
     
     static let identifier = "PhotosTableViewCell"
     
-    private let imageNames = ["photo1", "photo2", "photo3", "photo4"]
+    private let imageNames = (1...4).map { "photo\($0)" }
 
     private var imageViews: [UIImageView] = []
     
