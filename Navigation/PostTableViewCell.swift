@@ -34,9 +34,11 @@ class PostTableViewCell: UITableViewCell {
         descriptionLabel.text = post.description
         if let image = UIImage(named: post.image) {
             let processor = ImageProcessor()
-            processor.processImage(sourceImage: image, filter: .sepia(intensity: 1)) { filteredImage in
+            processor.processImageAsync(sourceImage: image, filter: .chrome) { [weak self] processedImage in
                 DispatchQueue.main.async {
-                    self.postImageView.image = filteredImage
+                    if let cgImage = processedImage {
+                        self?.postImageView.image = UIImage(cgImage: cgImage)
+                    }
                 }
             }
         }
