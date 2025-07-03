@@ -22,7 +22,19 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let feedNavController = UINavigationController(rootViewController: feedVC)
         feedNavController.tabBarItem = UITabBarItem(title: "Feed", image: UIImage(systemName: "list.bullet"), tag: 0)
         
-        let profileVC = LogInViewController()
+#if DEBUG
+let userService = TestUserService()
+#else
+let userService = CurrentUserService(user: User(
+    login: "cat",
+    fullName: "Hipster Cat",
+    avatar: UIImage(named: "cat") ?? UIImage(),
+    status: "Waiting for something..."
+))
+#endif
+
+        let profileVC = LogInViewController(userService: userService)
+        
         profileVC.tabBarItem = UITabBarItem(title: "Profile", image: UIImage(systemName: "person.circle"), tag: 1)
         
         let profileNavController = UINavigationController(rootViewController: profileVC)

@@ -25,7 +25,7 @@ class ProfileHeaderView: UIView {
     private var statusTextFieldTopConstraint: NSLayoutConstraint!
     private var statusButtonTopConstraint: NSLayoutConstraint!
     
-    private let avatarImageView: UIImageView = {
+    let avatarImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(named: "cat")
         imageView.layer.cornerRadius = 75
@@ -36,7 +36,7 @@ class ProfileHeaderView: UIView {
         return imageView
     }()
     
-    private let fullNameLabel: UILabel = {
+    let fullNameLabel: UILabel = {
         let label = UILabel()
         label.text = "Hipster Cat"
         label.font = UIFont.boldSystemFont(ofSize: 18)
@@ -44,7 +44,7 @@ class ProfileHeaderView: UIView {
         return label
     }()
     
-    private let statusLabel: UILabel = {
+    let statusLabel: UILabel = {
         let label = UILabel()
         label.text = "Waiting for something..."
         label.textColor = .gray

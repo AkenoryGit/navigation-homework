@@ -15,6 +15,8 @@ class ProfileViewController: UIViewController {
     private var avatarOriginalFrame: CGRect = .zero
     private var avatarSnapshotView: UIImageView?
     
+    var user: User?
+    
     private let overlayView: UIView = {
         let view = UIView()
         view.backgroundColor = UIColor.black.withAlphaComponent(0.5)
@@ -66,6 +68,13 @@ class ProfileViewController: UIViewController {
         }
         
         closeButton.addTarget(self, action: #selector(closeButtonTapped), for: .touchUpInside)
+        
+        if let user = user {
+            title = user.fullName
+            profileHeaderView.avatarImageView.image = user.avatar
+            profileHeaderView.fullNameLabel.text = user.fullName
+            profileHeaderView.statusLabel.text = user.status
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
