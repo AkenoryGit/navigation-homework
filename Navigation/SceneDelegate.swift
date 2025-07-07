@@ -33,7 +33,10 @@ let userService = CurrentUserService(user: User(
 ))
 #endif
 
+        let loginFactory = MyLoginFactory()
+        let loginInspector = loginFactory.makeLoginInspector()
         let profileVC = LogInViewController(userService: userService)
+        profileVC.loginDelegate = loginInspector
         
         profileVC.tabBarItem = UITabBarItem(title: "Profile", image: UIImage(systemName: "person.circle"), tag: 1)
         

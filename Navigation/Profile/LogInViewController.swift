@@ -9,6 +9,8 @@ import UIKit
 
 class LogInViewController: UIViewController {
     
+    var loginDelegate: LoginViewControllerDelegate?
+    
     private let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
@@ -123,12 +125,18 @@ class LogInViewController: UIViewController {
             return
         }
 
-        if let user = userService.getUser(login: login) {
+        guard let password = passwordTextField.text else {
+            showAlert(message: "Введите пароль")
+            return
+        }
+
+        if loginDelegate?.check(login: login, password: password) == true,
+           let user = userService.getUser(login: login) {
             let profileVC = ProfileViewController()
             profileVC.user = user
             navigationController?.pushViewController(profileVC, animated: true)
         } else {
-            showAlert(message: "Неверный логин")
+            showAlert(message: "Неверный логин или пароль")
         }
     }
     

@@ -22,31 +22,29 @@ class User {
 }
 
 protocol UserService {
+    var user: User { get set }
     func getUser(login: String) -> User?
 }
 
+extension UserService {
+    func getUser(login: String) -> User? {
+        return login == user.login ? user : nil
+    }
+}
+
 class CurrentUserService: UserService {
-    private let currentUser: User
+    var user: User
 
     init(user: User) {
-        self.currentUser = user
-    }
-
-    func getUser(login: String) -> User? {
-        return login == currentUser.login ? currentUser : nil
+        self.user = user
     }
 }
 
 final class TestUserService: UserService {
-    
-    private let testUser = User(
+    var user: User = User(
         login: "test",
         fullName: "Тестовый Пользователь",
         avatar: UIImage(named: "cat") ?? UIImage(),
         status: "Это тестовый статус"
     )
-    
-    func getUser(login: String) -> User? {
-        return login == testUser.login ? testUser : nil
-    }
 }
