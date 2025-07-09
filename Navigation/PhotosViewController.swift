@@ -6,15 +6,24 @@
 //
 
 import UIKit
+import iOSIntPackage
 
-final class PhotosViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+final class PhotosViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, ImageLibrarySubscriber {
 
     private var collectionView: UICollectionView!
+    private var receivedImages: [UIImage] = []
     
     private let imageNames = (1...18).map { "photo\($0)" }
+    private let imagePublisherFacade = ImagePublisherFacade()
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        imagePublisherFacade.subscribe(self)
+        imagePublisherFacade.addImagesWithTimer(
+            time: 0.5,
+            repeat: imageNames.count,
+            userImages: imageNames.compactMap { UIImage(named: $0) }
+        )
         view.backgroundColor = .systemBackground
         title = "Photo Gallery"
         setupCollectionView()
@@ -26,12 +35,12 @@ final class PhotosViewController: UIViewController, UICollectionViewDataSource, 
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return imageNames.count
+        return receivedImages.count
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PhotosCollectionViewCell.identifier, for: indexPath) as! PhotosCollectionViewCell
-        let image = UIImage(named: imageNames[indexPath.item])
+        let image = receivedImages[indexPath.item]
         cell.configure(with: image)
         return cell
     }
@@ -81,5 +90,17 @@ final class PhotosViewController: UIViewController, UICollectionViewDataSource, 
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+    }
+    
+    func receive(images: [UIImage]) {
+        DispatchQueue.main.async {
+            let newImages = images.filter { !self.receivedImages.contains($0) }
+            self.receivedImages.append(contentsOf: newImages)
+            self.collectionView.reloadData()
+        }
+    }
+    
+    deinit {
+        imagePublisherFacade.removeSubscription(for: self)
     }
 }
