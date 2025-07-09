@@ -97,6 +97,14 @@ class LogInViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+#if DEBUG
+emailTextField.text = "test"
+#else
+emailTextField.text = "cat"
+#endif
+
+passwordTextField.text = "1234"
 
         view.backgroundColor = .white
         navigationController?.navigationBar.isHidden = true

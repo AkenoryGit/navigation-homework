@@ -8,13 +8,20 @@
 import UIKit
 
 final class Checker {
+    static let shared = Checker()
     
-    static let shared = Checker() // Синглтон
+    private let validLogin: String
+    private let validPassword: String
     
-    private let validLogin = "cat"
-    private let validPassword = "1234"
-    
-    private init() {}
+    private init() {
+#if DEBUG
+        self.validLogin = "test"
+        self.validPassword = "1234"
+#else
+        self.validLogin = "cat"
+        self.validPassword = "1234"
+#endif
+    }
     
     func check(login: String, password: String) -> Bool {
         return login == validLogin && password == validPassword
