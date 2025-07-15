@@ -7,6 +7,7 @@
 
 import UIKit
 import StorageService
+import iOSIntPackage
 
 class PostTableViewCell: UITableViewCell {
     
@@ -27,13 +28,23 @@ class PostTableViewCell: UITableViewCell {
         setupViews()
         setupConstraints()
     }
-    
+
     func configure(with post: ProfilePost) {
         authorLabel.text = post.author
         descriptionLabel.text = post.description
-        postImageView.image = UIImage(named: post.image)
         likesLabel.text = "Likes: \(post.likes)"
         viewsLabel.text = "Views: \(post.views)"
+
+        if let image = UIImage(named: post.image) {
+            let processor = ImageProcessor()
+            processor.processImageAsync(sourceImage: image, filter: .chrome) { [weak self] processedCGImage in
+                DispatchQueue.main.async {
+                    if let cgImage = processedCGImage {
+                        self?.postImageView.image = UIImage(cgImage: cgImage)
+                    }
+                }
+            }
+        }
     }
     
     private func setupViews() {

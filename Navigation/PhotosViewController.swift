@@ -93,14 +93,15 @@ final class PhotosViewController: UIViewController, UICollectionViewDataSource, 
     }
     
     func receive(images: [UIImage]) {
-        DispatchQueue.main.async {
-            let newImages = images.filter { !self.receivedImages.contains($0) }
-            self.receivedImages.append(contentsOf: newImages)
-            self.collectionView.reloadData()
-        }
+        receivedImages = images
+        collectionView.reloadData()
+        
+        let item = IndexPath(item: images.count - 1, section: 0)
+        collectionView.scrollToItem(at: item, at: .bottom, animated: true)
     }
     
-    deinit {
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
         imagePublisherFacade.removeSubscription(for: self)
     }
 }
