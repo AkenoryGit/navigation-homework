@@ -10,7 +10,7 @@ import StorageService
 
 class FeedViewController: UIViewController {
     
-    private let feedModel = FeedModel()
+    private let viewModel = FeedViewModel()
 
     private lazy var button1 = CustomButton(title: "Открыть пост 1") { [weak self] in
         let post = Post(title: "Пост №1")
@@ -35,7 +35,7 @@ class FeedViewController: UIViewController {
     private lazy var checkGuessButton = CustomButton(title: "Проверить") { [weak self] in
         guard let self = self else { return }
         let guess = self.guessTextField.text ?? ""
-        let isCorrect = self.feedModel.check(word: guess)
+        let isCorrect = self.viewModel.check(word: guess)
         
         self.resultLabel.text = isCorrect ? "Верно!" : "Неверно!"
         self.resultLabel.textColor = isCorrect ? .systemGreen : .systemRed
