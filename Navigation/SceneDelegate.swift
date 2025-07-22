@@ -10,44 +10,19 @@ import UIKit
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
+    var appCoordinator: AppCoordinator?
 
-
-    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+    func scene(_ scene: UIScene,
+               willConnectTo session: UISceneSession,
+               options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
-        
-        let window = UIWindow(windowScene: windowScene)
-        let tabBarController = UITabBarController()
-        
-        let feedVC = FeedViewController()
-        let feedNavController = UINavigationController(rootViewController: feedVC)
-        feedNavController.tabBarItem = UITabBarItem(title: "Feed", image: UIImage(systemName: "list.bullet"), tag: 0)
-        
-#if DEBUG
-let userService = TestUserService()
-#else
-let userService = CurrentUserService(user: User(
-    login: "cat",
-    fullName: "Hipster Cat",
-    avatar: UIImage(named: "cat") ?? UIImage(),
-    status: "Waiting for something..."
-))
-#endif
 
-        let loginFactory = MyLoginFactory()
-        let loginInspector = loginFactory.makeLoginInspector()
-        let profileVC = LogInViewController(userService: userService)
-        profileVC.loginDelegate = loginInspector
-        
-        profileVC.tabBarItem = UITabBarItem(title: "Profile", image: UIImage(systemName: "person.circle"), tag: 1)
-        
-        let profileNavController = UINavigationController(rootViewController: profileVC)
-        profileNavController.tabBarItem = UITabBarItem(title: "Profile", image: UIImage(systemName: "person.circle"), tag: 1)
-        
-        tabBarController.setViewControllers([feedNavController, profileNavController], animated: false)
-        
-        window.rootViewController = tabBarController
+        let window = UIWindow(windowScene: windowScene)
         self.window = window
-        window.makeKeyAndVisible()
+
+        let appCoordinator = AppCoordinator(window: window)
+        self.appCoordinator = appCoordinator
+        appCoordinator.start()
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
@@ -77,7 +52,6 @@ let userService = CurrentUserService(user: User(
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
     }
-
 
 }
 
