@@ -11,17 +11,17 @@ import StorageService
 class FeedViewController: UIViewController {
     
     private let viewModel = FeedViewModel()
+    
+    weak var coordinator: FeedCoordinator?
 
     private lazy var button1 = CustomButton(title: "Открыть пост 1") { [weak self] in
         let post = Post(title: "Пост №1")
-        let postVC = PostViewController(post: post)
-        self?.navigationController?.pushViewController(postVC, animated: true)
+        self?.coordinator?.showPost(post: post)
     }
-
+    
     private lazy var button2 = CustomButton(title: "Открыть пост 2") { [weak self] in
         let post = Post(title: "Пост №2")
-        let postVC = PostViewController(post: post)
-        self?.navigationController?.pushViewController(postVC, animated: true)
+        self?.coordinator?.showPost(post: post)
     }
     
     private let guessTextField: UITextField = {

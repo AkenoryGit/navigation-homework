@@ -10,6 +10,7 @@ import UIKit
 class LogInViewController: UIViewController {
     
     var loginDelegate: LoginViewControllerDelegate?
+    var onLoginSuccess: ((User) -> Void)?
     
     private let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
@@ -140,9 +141,7 @@ passwordTextField.text = "1234"
 
         if loginDelegate?.check(login: login, password: password) == true,
            let user = userService.getUser(login: login) {
-            let profileVC = ProfileViewController()
-            profileVC.user = user
-            navigationController?.pushViewController(profileVC, animated: true)
+            onLoginSuccess?(user)
         } else {
             showAlert(message: "Неверный логин или пароль")
         }
