@@ -8,22 +8,35 @@
 import UIKit
 import iOSIntPackage
 
-final class PhotosViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, ImageLibrarySubscriber {
+final class PhotosViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
 
     private var collectionView: UICollectionView!
     private var receivedImages: [UIImage] = []
     
     private let imageNames = (1...18).map { "photo\($0)" }
-    private let imagePublisherFacade = ImagePublisherFacade()
+    private let imageProcessor = ImageProcessor()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        imagePublisherFacade.subscribe(self)
-        imagePublisherFacade.addImagesWithTimer(
-            time: 0.5,
-            repeat: imageNames.count,
-            userImages: imageNames.compactMap { UIImage(named: $0) }
-        )
+        let sourceImages = imageNames.compactMap { UIImage(named: $0) }
+
+        let start = Date()
+
+        imageProcessor.processImagesOnThread(
+            sourceImages: sourceImages,
+            filter: .posterize,
+            qos: .userInitiated
+        ) { [weak self] processedImages in
+            let end = Date()
+            let duration = end.timeIntervalSince(start)
+            print("Обработка изображений заняла: \(duration) секунд")
+
+            DispatchQueue.main.async {
+                self?.receivedImages = processedImages.compactMap { $0.map { UIImage(cgImage: $0) } }
+                self?.collectionView.reloadData()
+            }
+        }
+
         view.backgroundColor = .systemBackground
         title = "Photo Gallery"
         setupCollectionView()
@@ -92,16 +105,4 @@ final class PhotosViewController: UIViewController, UICollectionViewDataSource, 
         ])
     }
     
-    func receive(images: [UIImage]) {
-        receivedImages = images
-        collectionView.reloadData()
-        
-        let item = IndexPath(item: images.count - 1, section: 0)
-        collectionView.scrollToItem(at: item, at: .bottom, animated: true)
-    }
-    
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
-        imagePublisherFacade.removeSubscription(for: self)
-    }
 }
