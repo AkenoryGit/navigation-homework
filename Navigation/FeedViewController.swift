@@ -15,13 +15,11 @@ class FeedViewController: UIViewController {
     weak var coordinator: FeedCoordinator?
 
     private lazy var button1 = CustomButton(title: "Открыть пост 1") { [weak self] in
-        let post = Post(title: "Пост №1")
-        self?.coordinator?.showPost(post: post)
+        self?.coordinator?.present(.post1)
     }
     
     private lazy var button2 = CustomButton(title: "Открыть пост 2") { [weak self] in
-        let post = Post(title: "Пост №2")
-        self?.coordinator?.showPost(post: post)
+        self?.coordinator?.present(.post2)
     }
     
     private let guessTextField: UITextField = {

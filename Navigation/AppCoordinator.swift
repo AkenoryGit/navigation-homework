@@ -20,14 +20,8 @@ final class AppCoordinator {
     }
 
     func start() {
-        feedCoordinator.start()
+        feedCoordinator.setup()
         profileCoordinator.start()
-
-        feedCoordinator.navigationController.tabBarItem = UITabBarItem(
-            title: "Лента",
-            image: UIImage(systemName: "list.bullet"),
-            tag: 0
-        )
 
         profileCoordinator.navigationController.tabBarItem = UITabBarItem(
             title: "Профиль",
@@ -36,7 +30,7 @@ final class AppCoordinator {
         )
 
         tabBarController.viewControllers = [
-            feedCoordinator.navigationController,
+            feedCoordinator.controller,
             profileCoordinator.navigationController
         ]
 
