@@ -12,6 +12,8 @@ class LogInViewController: UIViewController {
     var loginDelegate: LoginViewControllerDelegate?
     var onLoginSuccess: ((User) -> Void)?
     
+    private let bruteForcer = PasswordBruteForcer()
+    
     private let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
@@ -84,6 +86,24 @@ class LogInViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
+    
+    private let bruteForceButton: UIButton = {
+        let btn = UIButton(type: .system)
+        btn.setTitle("Подобрать пароль", for: .normal)
+        btn.setTitleColor(.white, for: .normal)
+        btn.setBackgroundImage(UIImage(named: "blue_pixel"), for: .normal)
+        btn.layer.cornerRadius = 10
+        btn.layer.masksToBounds = true
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        return btn
+    }()
+    
+    private let activityIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .medium)
+        indicator.hidesWhenStopped = true
+        indicator.translatesAutoresizingMaskIntoConstraints = false 
+        return indicator
+    }()
 
     private let userService: UserService
 
@@ -104,7 +124,6 @@ emailTextField.text = "test"
 #else
 emailTextField.text = "cat"
 #endif
-
 passwordTextField.text = "1234"
 
         view.backgroundColor = .white
@@ -113,6 +132,7 @@ passwordTextField.text = "1234"
         setupView()
         setupConstraints()
         logInButton.addTarget(self, action: #selector(logInButtonTapped), for: .touchUpInside)
+        bruteForceButton.addTarget(self, action: #selector(bruteForceTapped), for: .touchUpInside)
         
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(keyboardWillShow),
@@ -147,6 +167,19 @@ passwordTextField.text = "1234"
         }
     }
     
+    @objc private func bruteForceTapped() {
+        activityIndicator.startAnimating()
+        passwordTextField.text = ""
+        passwordTextField.isSecureTextEntry = true
+
+        let passwordToFind = bruteForcer.generateRandomPassword(length: 4)
+        bruteForcer.bruteForce(passwordToUnlock: passwordToFind) { [weak self] result in
+            self?.passwordTextField.text = result
+            self?.passwordTextField.isSecureTextEntry = false
+            self?.activityIndicator.stopAnimating()
+        }
+    }
+    
     @objc private func keyboardWillShow(_ notification: Notification) {
         guard let userInfo = notification.userInfo,
               let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
@@ -174,6 +207,8 @@ passwordTextField.text = "1234"
         contentView.addSubview(logoImageView)
         contentView.addSubview(textFieldStackView)
         contentView.addSubview(logInButton)
+        contentView.addSubview(bruteForceButton)
+        contentView.addSubview(activityIndicator)
     }
 
     private func setupConstraints() {
@@ -206,7 +241,15 @@ passwordTextField.text = "1234"
             logInButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             logInButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             logInButton.heightAnchor.constraint(equalToConstant: 50),
-            logInButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+
+            bruteForceButton.topAnchor.constraint(equalTo: logInButton.bottomAnchor, constant: 16),
+            bruteForceButton.leadingAnchor.constraint(equalTo: logInButton.leadingAnchor),
+            bruteForceButton.trailingAnchor.constraint(equalTo: logInButton.trailingAnchor),
+            bruteForceButton.heightAnchor.constraint(equalToConstant: 50),
+
+            activityIndicator.topAnchor.constraint(equalTo: bruteForceButton.bottomAnchor, constant: 8),
+            activityIndicator.centerXAnchor.constraint(equalTo: bruteForceButton.centerXAnchor),
+            bruteForceButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20)
         ])
     }
     
