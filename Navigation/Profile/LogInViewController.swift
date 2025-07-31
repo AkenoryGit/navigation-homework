@@ -133,6 +133,12 @@ passwordTextField.text = "1234"
         setupConstraints()
         logInButton.addTarget(self, action: #selector(logInButtonTapped), for: .touchUpInside)
         bruteForceButton.addTarget(self, action: #selector(bruteForceTapped), for: .touchUpInside)
+
+        bruteForceButton.addSubview(activityIndicator)
+        NSLayoutConstraint.activate([
+            activityIndicator.centerXAnchor.constraint(equalTo: bruteForceButton.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: bruteForceButton.centerYAnchor)
+        ])
         
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(keyboardWillShow),
@@ -168,15 +174,23 @@ passwordTextField.text = "1234"
     }
     
     @objc private func bruteForceTapped() {
+        bruteForceButton.isEnabled = false
+        bruteForceButton.setTitle("", for: .normal)
         activityIndicator.startAnimating()
+
         passwordTextField.text = ""
         passwordTextField.isSecureTextEntry = true
 
         let passwordToFind = bruteForcer.generateRandomPassword(length: 4)
         bruteForcer.bruteForce(passwordToUnlock: passwordToFind) { [weak self] result in
-            self?.passwordTextField.text = result
-            self?.passwordTextField.isSecureTextEntry = false
-            self?.activityIndicator.stopAnimating()
+            guard let self = self else { return }
+
+            self.passwordTextField.text = result
+            self.passwordTextField.isSecureTextEntry = false
+
+            self.activityIndicator.stopAnimating()
+            self.bruteForceButton.setTitle("Подобрать пароль", for: .normal)
+            self.bruteForceButton.isEnabled = true
         }
     }
     
@@ -208,7 +222,6 @@ passwordTextField.text = "1234"
         contentView.addSubview(textFieldStackView)
         contentView.addSubview(logInButton)
         contentView.addSubview(bruteForceButton)
-        contentView.addSubview(activityIndicator)
     }
 
     private func setupConstraints() {
@@ -246,9 +259,6 @@ passwordTextField.text = "1234"
             bruteForceButton.leadingAnchor.constraint(equalTo: logInButton.leadingAnchor),
             bruteForceButton.trailingAnchor.constraint(equalTo: logInButton.trailingAnchor),
             bruteForceButton.heightAnchor.constraint(equalToConstant: 50),
-
-            activityIndicator.topAnchor.constraint(equalTo: bruteForceButton.bottomAnchor, constant: 8),
-            activityIndicator.centerXAnchor.constraint(equalTo: bruteForceButton.centerXAnchor),
             bruteForceButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20)
         ])
     }
