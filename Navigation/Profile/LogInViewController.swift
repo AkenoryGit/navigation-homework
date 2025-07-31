@@ -12,6 +12,10 @@ class LogInViewController: UIViewController {
     var loginDelegate: LoginViewControllerDelegate?
     var onLoginSuccess: ((User) -> Void)?
     
+    private var failedAttempts = 0
+    private var lockoutTimer: Timer?
+    private var lockoutSecondsRemaining = 0
+    
     private let bruteForcer = PasswordBruteForcer()
     
     private let scrollView: UIScrollView = {
@@ -155,6 +159,11 @@ passwordTextField.text = "1234"
     }
     
     @objc private func logInButtonTapped() {
+        guard lockoutTimer == nil else {
+            showAlert(message: "Слишком много попыток. Подождите \(lockoutSecondsRemaining) сек.")
+            return
+        }
+
         guard let login = emailTextField.text, !login.isEmpty else {
             showAlert(message: "Введите логин")
             return
@@ -167,10 +176,40 @@ passwordTextField.text = "1234"
 
         if loginDelegate?.check(login: login, password: password) == true,
            let user = userService.getUser(login: login) {
+            failedAttempts = 0
             onLoginSuccess?(user)
         } else {
-            showAlert(message: "Неверный логин или пароль")
+            failedAttempts += 1
+            if failedAttempts >= 3 {
+                startLockout()
+            } else {
+                showAlert(message: "Неверный логин или пароль")
+            }
         }
+    }
+    
+    private func startLockout() {
+        lockoutSecondsRemaining = 15
+        logInButton.isEnabled = false
+        updateLockoutButtonTitle()
+        
+        lockoutTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
+            guard let self = self else { return }
+            self.lockoutSecondsRemaining -= 1
+            self.updateLockoutButtonTitle()
+
+            if self.lockoutSecondsRemaining <= 0 {
+                timer.invalidate()
+                self.lockoutTimer = nil
+                self.logInButton.setTitle("Log In", for: .normal)
+                self.logInButton.isEnabled = true
+                self.failedAttempts = 0
+            }
+        }
+    }
+    
+    private func updateLockoutButtonTitle() {
+        logInButton.setTitle("Подождите \(lockoutSecondsRemaining) сек", for: .normal)
     }
     
     @objc private func bruteForceTapped() {
