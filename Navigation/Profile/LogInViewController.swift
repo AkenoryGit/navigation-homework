@@ -117,7 +117,7 @@ class LogInViewController: UIViewController {
     }
 
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        preconditionFailure("init(coder:) has not been implemented")
     }
     
     override func viewDidLoad() {
@@ -164,27 +164,34 @@ passwordTextField.text = "1234"
             return
         }
 
-        guard let login = emailTextField.text, !login.isEmpty else {
-            showAlert(message: "Введите логин")
-            return
-        }
-
-        guard let password = passwordTextField.text else {
-            showAlert(message: "Введите пароль")
-            return
-        }
-
-        if loginDelegate?.check(login: login, password: password) == true,
-           let user = userService.getUser(login: login) {
+        let login = emailTextField.text ?? ""
+        let password = passwordTextField.text ?? ""
+        
+        do {
+            let user = try attemptLogin(login: login, password: password)
             failedAttempts = 0
             onLoginSuccess?(user)
-        } else {
+        } catch let error as LoginError {
             failedAttempts += 1
+            handleLoginError(error)
             if failedAttempts >= 3 {
                 startLockout()
-            } else {
-                showAlert(message: "Неверный логин или пароль")
             }
+        } catch {
+            showAlert(message: "Ошибка авторизации")
+        }
+    }
+    
+    private func handleLoginError(_ error: LoginError) {
+        switch error {
+        case .emptyLogin:
+            showAlert(message: "Введите логин")
+        case .emptyPassword:
+            showAlert(message: "Введите пароль")
+        case .invalidCredentials:
+            showAlert(message: "Неверный логин или пароль")
+        case .userNotFound:
+            showAlert(message: "Пользователь не найден")
         }
     }
     
@@ -216,20 +223,27 @@ passwordTextField.text = "1234"
         bruteForceButton.isEnabled = false
         bruteForceButton.setTitle("", for: .normal)
         activityIndicator.startAnimating()
-
+        
         passwordTextField.text = ""
         passwordTextField.isSecureTextEntry = true
-
-        let passwordToFind = bruteForcer.generateRandomPassword(length: 4)
-        bruteForcer.bruteForce(passwordToUnlock: passwordToFind) { [weak self] result in
-            guard let self = self else { return }
-
-            self.passwordTextField.text = result
-            self.passwordTextField.isSecureTextEntry = false
-
-            self.activityIndicator.stopAnimating()
-            self.bruteForceButton.setTitle("Подобрать пароль", for: .normal)
+        
+        switch bruteForcer.generateRandomPassword(length: 4) {
+        case .success(let passwordToFind):
+            bruteForcer.bruteForce(passwordToUnlock: passwordToFind) { [weak self] result in
+                guard let self = self else { return }
+                
+                self.passwordTextField.text = result
+                self.passwordTextField.isSecureTextEntry = false
+                
+                self.activityIndicator.stopAnimating()
+                self.bruteForceButton.setTitle("Подобрать пароль", for: .normal)
+                self.bruteForceButton.isEnabled = true
+            }
+        case .failure(let error):
+            self.showAlert(message: "Ошибка подбора пароля: \(error.localizedDescription)")
+            self.bruteForceButton.setTitle("Ошибка", for: .normal)
             self.bruteForceButton.isEnabled = true
+            self.activityIndicator.stopAnimating()
         }
     }
     
@@ -300,6 +314,19 @@ passwordTextField.text = "1234"
             bruteForceButton.heightAnchor.constraint(equalToConstant: 50),
             bruteForceButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20)
         ])
+    }
+    
+    private func attemptLogin(login: String, password: String) throws -> User {
+        guard !login.isEmpty else { throw LoginError.emptyLogin }
+        guard !password.isEmpty else { throw LoginError.emptyPassword }
+        guard loginDelegate?.check(login: login, password: password) == true else {
+            throw LoginError.invalidCredentials
+        }
+        guard let user = userService.getUser(login: login) else {
+            throw LoginError.userNotFound
+        }
+        
+          return user
     }
     
     deinit {

@@ -27,9 +27,15 @@ final class PasswordBruteForcer {
         }
     }
     
-    func generateRandomPassword(length: Int) -> String {
+    func generateRandomPassword(length: Int) -> Result<String, PasswordError> {
+        guard length > 0 else {
+            return .failure(.invalidLeingth)
+        }
+        
         let characters = allowedCharacters.map { Character($0) }
-        return String((0..<length).compactMap { _ in characters.randomElement() })
+        let password = String((0..<length).compactMap { _ in characters.randomElement() })
+            
+            return .success(password)
     }
 
     private func generateNextPassword(_ current: String) -> String {
@@ -73,3 +79,8 @@ extension String {
         self = String(array)
     }
 }
+
+enum PasswordError: Error {
+    case invalidLeingth
+}
+
