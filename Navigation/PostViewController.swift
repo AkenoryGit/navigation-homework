@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import StorageService
 
 class PostViewController: UIViewController {
     private let post: Post
@@ -16,7 +17,7 @@ class PostViewController: UIViewController {
     }
     
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        fatalError("init(coder:) не был реализован")
     }
     
     override func viewDidLoad() {
