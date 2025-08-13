@@ -106,6 +106,9 @@ class ProfileViewController: UIViewController {
         tableView.register(PhotosTableViewCell.self, forCellReuseIdentifier: PhotosTableViewCell.identifier)
         tableView.estimatedRowHeight = 300
         tableView.rowHeight = UITableView.automaticDimension
+        tableView.register(MusicPlayerTableViewCell.self, forCellReuseIdentifier: MusicPlayerTableViewCell.identifier)
+        tableView.register(YouTubeVideosTableViewCell.self, forCellReuseIdentifier: YouTubeVideosTableViewCell.identifier)
+        tableView.register(AudioRecorderTableViewCell.self, forCellReuseIdentifier: AudioRecorderTableViewCell.identifier)
     }
     
     private func animateAvatarExpansion() {
@@ -176,7 +179,7 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return posts.count + 1
+        return posts.count + 4
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
@@ -189,16 +192,29 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if indexPath.row == 0 {
+        switch indexPath.row {
+        case 0:
+            let cell = tableView.dequeueReusableCell(withIdentifier: YouTubeVideosTableViewCell.identifier, for: indexPath) as! YouTubeVideosTableViewCell
+            cell.parentViewController = self
+            return cell
+        case 1:
+            return tableView.dequeueReusableCell(withIdentifier: MusicPlayerTableViewCell.identifier, for: indexPath)
+        case 2:
             let cell = tableView.dequeueReusableCell(withIdentifier: PhotosTableViewCell.identifier, for: indexPath) as! PhotosTableViewCell
             cell.onArrowTapped = { [weak self] in
                 let photosVC = PhotosViewController()
                 self?.navigationController?.pushViewController(photosVC, animated: true)
             }
             return cell
-        } else {
+        case 3:
+            let cell = tableView.dequeueReusableCell(withIdentifier: AudioRecorderTableViewCell.identifier, for: indexPath) as! AudioRecorderTableViewCell
+            return cell
+        default:
             let cell = tableView.dequeueReusableCell(withIdentifier: "PostCell", for: indexPath) as! PostTableViewCell
-            cell.configure(with: posts[indexPath.row - 1])
+            let postIndex = indexPath.row - 4
+            if postIndex >= 0 && postIndex < posts.count {
+                cell.configure(with: posts[postIndex])
+            }
             return cell
         }
     }
