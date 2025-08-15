@@ -11,6 +11,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
     var appCoordinator: AppCoordinator?
+    
+    var appConfiguration: AppConfiguration = {
+        let configurations: [AppConfiguration] = [.people, .starships, .planets]
+        return configurations.randomElement()!
+    }()
 
     func scene(_ scene: UIScene,
                willConnectTo session: UISceneSession,
@@ -20,7 +25,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let window = UIWindow(windowScene: windowScene)
         self.window = window
 
-        let appCoordinator = AppCoordinator(window: window)
+        let appCoordinator = AppCoordinator(window: window, configuration: appConfiguration)
         self.appCoordinator = appCoordinator
         appCoordinator.start()
     }

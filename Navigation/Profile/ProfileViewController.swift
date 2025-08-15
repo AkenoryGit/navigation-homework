@@ -24,7 +24,7 @@ class ProfileViewController: UIViewController {
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
-
+    
     private let closeButton: UIButton = {
         let button = UIButton(type: .system)
         let config = UIImage.SymbolConfiguration(pointSize: 24, weight: .bold)
@@ -50,13 +50,13 @@ class ProfileViewController: UIViewController {
         
         view.addSubview(overlayView)
         view.addSubview(closeButton)
-
+        
         NSLayoutConstraint.activate([
             overlayView.topAnchor.constraint(equalTo: view.topAnchor),
             overlayView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             overlayView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             overlayView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-
+            
             closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             closeButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             closeButton.widthAnchor.constraint(equalToConstant: 44),
@@ -90,7 +90,7 @@ class ProfileViewController: UIViewController {
     
     private func setupTableViewConstraints() {
         tableView.translatesAutoresizingMaskIntoConstraints = false
-
+        
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -98,7 +98,7 @@ class ProfileViewController: UIViewController {
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
-
+    
     private func configureTableView() {
         tableView.delegate = self
         tableView.dataSource = self
@@ -114,10 +114,10 @@ class ProfileViewController: UIViewController {
     private func animateAvatarExpansion() {
         guard let avatarImage = profileHeaderView.avatarImage else { return }
         guard let window = view.window else { return }
-
+        
         let avatarFrameInWindow = profileHeaderView.convert(profileHeaderView.avatarFrame, to: window)
         avatarOriginalFrame = avatarFrameInWindow
-
+        
         let avatarView = UIImageView(image: avatarImage)
         avatarView.frame = avatarFrameInWindow
         avatarView.layer.cornerRadius = profileHeaderView.avatarCornerRadius
@@ -125,15 +125,15 @@ class ProfileViewController: UIViewController {
         avatarView.contentMode = .scaleAspectFill
         avatarView.layer.masksToBounds = true
         avatarSnapshotView = avatarView
-
+        
         window.addSubview(avatarView)
         view.bringSubviewToFront(overlayView)
         view.bringSubviewToFront(closeButton)
-
+        
         let targetWidth = window.bounds.width
         let targetHeight = avatarImage.size.height * (targetWidth / avatarImage.size.width)
         let targetY = (window.bounds.height - targetHeight) / 2
-
+        
         UIView.animate(withDuration: 0.5, animations: {
             avatarView.frame = CGRect(x: 0, y: targetY, width: targetWidth, height: targetHeight)
             let radiusAnimation = CABasicAnimation(keyPath: "cornerRadius")
@@ -152,7 +152,7 @@ class ProfileViewController: UIViewController {
     
     @objc private func closeButtonTapped() {
         guard let avatarView = avatarSnapshotView else { return }
-
+        
         UIView.animate(withDuration: 0.3, animations: {
             self.closeButton.alpha = 0
         }, completion: { _ in
@@ -172,7 +172,7 @@ class ProfileViewController: UIViewController {
         })
     }
 }
-
+    
 extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
