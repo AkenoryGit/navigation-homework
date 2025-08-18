@@ -37,7 +37,7 @@ class PlanetsViewController: UIViewController {
     }
 
     private func fetchPlanets() {
-        NetworkService.request(for: .planets) { [weak self] planets in
+        NetworkService.request(url: AppConfiguration.planets.url) { [weak self] planets in
             DispatchQueue.main.async {
                 self?.planets = planets
                 self?.tableView.reloadData()

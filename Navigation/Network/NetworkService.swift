@@ -8,19 +8,8 @@
 import Foundation
 
 struct NetworkService {
-    static func request<T: Decodable>(for configuration: AppConfiguration, completion: @escaping ([T]) -> Void) {
-        let urlString: String
-
-        switch configuration {
-        case .people:
-            urlString = "https://swapi.py4e.com/api/people"
-        case .starships:
-            urlString = "https://swapi.py4e.com/api/starships"
-        case .planets:
-            urlString = "https://swapi.py4e.com/api/planets"
-        }
-
-        guard let url = URL(string: urlString) else {
+    static func request<T: Decodable>(url: URL?, completion: @escaping ([T]) -> Void) {
+        guard let url = url else {
             print("Невалидный URL")
             return
         }
@@ -31,45 +20,23 @@ struct NetworkService {
                 return
             }
 
-            guard let httpResponse = response as? HTTPURLResponse,
-                  (200...299).contains(httpResponse.statusCode) else {
-                print("Сервер вернул ошибку")
-                return
+            if let httpResponse = response as? HTTPURLResponse {
+                print("HTTP Status Code: \(httpResponse.statusCode)")
+                print("Headers: \(httpResponse.allHeaderFields)")
             }
 
             guard let data = data else {
                 print("Нет данных")
                 return
             }
-            
-            print("DATA:")
-            print(String(data: data, encoding: .utf8) ?? "Не удалось декодировать данные")
 
-            print("HEADERS:")
-            print(httpResponse.allHeaderFields)
-
-            print("STATUS CODE:")
-            print(httpResponse.statusCode)
+            print("Raw JSON: \(String(data: data, encoding: .utf8) ?? "не удалось преобразовать")")
 
             do {
-                let decodedResponse = try JSONDecoder().decode(GenericResponse<T>.self, from: data)
-                completion(decodedResponse.results)
+                let decoded = try JSONDecoder().decode(GenericResponse<T>.self, from: data)
+                completion(decoded.results)
             } catch {
                 print("Ошибка при декодировании: \(error.localizedDescription)")
-                if let decodingError = error as? DecodingError {
-                    switch decodingError {
-                    case .keyNotFound(let key, let context):
-                        print("Ключ не найден: \(key), контекст: \(context.debugDescription)")
-                    case .typeMismatch(let type, let context):
-                        print("Несоответствие типа: \(type), контекст: \(context.debugDescription)")
-                    case .valueNotFound(let type, let context):
-                        print("Значение не найдено: \(type), контекст: \(context.debugDescription)")
-                    case .dataCorrupted(let context):
-                        print("Данные повреждены: \(context.debugDescription)")
-                    @unknown default:
-                        print("Неизвестная ошибка декодирования")
-                    }
-                }
             }
         }
 
@@ -85,8 +52,12 @@ struct GenericResponse<T: Decodable>: Decodable {
 }
 
 
-enum AppConfiguration {
-    case people
-    case starships
-    case planets
+enum AppConfiguration: String, CaseIterable {
+    case people = "https://swapi.py4e.com/api/people"
+    case starships = "https://swapi.py4e.com/api/starships"
+    case planets = "https://swapi.py4e.com/api/planets"
+
+    var url: URL? {
+        URL(string: self.rawValue)
+    }
 }

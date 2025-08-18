@@ -19,7 +19,7 @@ class StarshipsViewController: UIViewController {
 
         setupTableView()
 
-        NetworkService.request(for: .starships) { (starships: [Starship]) in
+        NetworkService.request(url: AppConfiguration.starships.url) { (starships: [Starship]) in
             DispatchQueue.main.async {
                 self.starships = starships
                 self.tableView.reloadData()

@@ -37,7 +37,7 @@ class PeopleViewController: UIViewController {
     }
 
     private func fetchPeople() {
-        NetworkService.request(for: .people) { [weak self] people in
+        NetworkService.request(url: AppConfiguration.people.url) { [weak self] people in
             DispatchQueue.main.async {
                 self?.people = people
                 self?.tableView.reloadData()

@@ -24,15 +24,15 @@ final class AppCoordinator {
     func start() {
         switch configuration {
         case .people:
-            NetworkService.request(for: .people) { (people: [Person]) in
+            NetworkService.request(url: AppConfiguration.people.url) { (people: [Person]) in
                 print("Загружено людей: \(people.count)")
             }
         case .starships:
-            NetworkService.request(for: .starships) { (starships: [Starship]) in
+            NetworkService.request(url: AppConfiguration.starships.url) { (starships: [Starship]) in
                 print("Загружено кораблей: \(starships.count)")
             }
         case .planets:
-            NetworkService.request(for: .planets) { (planets: [Planet]) in
+            NetworkService.request(url: AppConfiguration.planets.url) { (planets: [Planet]) in
                 print("Загружено планет: \(planets.count)")
             }
         }
