@@ -33,8 +33,13 @@ struct NetworkService {
             print("Raw JSON: \(String(data: data, encoding: .utf8) ?? "не удалось преобразовать")")
 
             do {
-                let decoded = try JSONDecoder().decode(GenericResponse<T>.self, from: data)
-                completion(decoded.results)
+                if url.absoluteString.contains("todos") {
+                    let decoded = try JSONDecoder().decode([T].self, from: data)
+                    completion(decoded)
+                } else {
+                    let decoded = try JSONDecoder().decode(GenericResponse<T>.self, from: data)
+                    completion(decoded.results)
+                }
             } catch {
                 print("Ошибка при декодировании: \(error.localizedDescription)")
             }
@@ -56,6 +61,7 @@ enum AppConfiguration: String, CaseIterable {
     case people = "https://swapi.py4e.com/api/people"
     case starships = "https://swapi.py4e.com/api/starships"
     case planets = "https://swapi.py4e.com/api/planets"
+    case todos = "https://jsonplaceholder.typicode.com/todos"
 
     var url: URL? {
         URL(string: self.rawValue)

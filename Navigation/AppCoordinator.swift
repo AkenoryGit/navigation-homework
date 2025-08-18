@@ -35,6 +35,10 @@ final class AppCoordinator {
             NetworkService.request(url: AppConfiguration.planets.url) { (planets: [Planet]) in
                 print("Загружено планет: \(planets.count)")
             }
+        case .todos:
+            NetworkService.request(url: AppConfiguration.todos.url) { (todos: [TodoItem]) in
+                print("Загружено задач: \(todos.count)")
+            }
         }
 
         feedCoordinator.setup()

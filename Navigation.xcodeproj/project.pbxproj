@@ -260,6 +260,7 @@
 				DEVELOPMENT_TEAM = A2GUSDBPJ5;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Navigation/Info.plist;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Для записи вашего голоса нужно разрешение на микрофон";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = "";
@@ -288,6 +289,7 @@
 				DEVELOPMENT_TEAM = A2GUSDBPJ5;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Navigation/Info.plist;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Для записи вашего голоса нужно разрешение на микрофон";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = "";
@@ -431,6 +433,7 @@
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = A2GUSDBPJ5;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -467,6 +470,7 @@
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = A2GUSDBPJ5;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
