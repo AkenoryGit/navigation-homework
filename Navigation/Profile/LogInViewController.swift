@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseAuth
 
 class LogInViewController: UIViewController {
     
@@ -91,6 +92,14 @@ class LogInViewController: UIViewController {
         return button
     }()
     
+    private let signUpButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Зарегистрироваться", for: .normal)
+        button.setTitleColor(.systemBlue, for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
     private let bruteForceButton: UIButton = {
         let btn = UIButton(type: .system)
         btn.setTitle("Подобрать пароль", for: .normal)
@@ -137,6 +146,7 @@ passwordTextField.text = "1234"
         setupConstraints()
         logInButton.addTarget(self, action: #selector(logInButtonTapped), for: .touchUpInside)
         bruteForceButton.addTarget(self, action: #selector(bruteForceTapped), for: .touchUpInside)
+        signUpButton.addTarget(self, action: #selector(signUpButtonTapped), for: .touchUpInside)
 
         bruteForceButton.addSubview(activityIndicator)
         NSLayoutConstraint.activate([
@@ -159,40 +169,60 @@ passwordTextField.text = "1234"
     }
     
     @objc private func logInButtonTapped() {
+        print("Нажата кнопка логина")
         guard lockoutTimer == nil else {
             showAlert(message: "Слишком много попыток. Подождите \(lockoutSecondsRemaining) сек.")
             return
         }
 
-        let login = emailTextField.text ?? ""
+        let email = emailTextField.text ?? ""
         let password = passwordTextField.text ?? ""
         
-        do {
-            let user = try attemptLogin(login: login, password: password)
-            failedAttempts = 0
-            onLoginSuccess?(user)
-        } catch let error as LoginError {
-            failedAttempts += 1
-            handleLoginError(error)
-            if failedAttempts >= 3 {
-                startLockout()
+        guard !email.isEmpty, !password.isEmpty else {
+            self.showAlert(message: "Введите email и пароль")
+            return
+        }
+
+        loginDelegate?.checkCredentials(email: email, password: password) { [weak self] result in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                switch result {
+                case .success():
+                    self.failedAttempts = 0
+                    print("Успешный вход!")
+                    let profileVC = ProfileViewController()
+                    self.navigationController?.pushViewController(profileVC, animated: true)
+                case .failure(let error):
+                    self.failedAttempts += 1
+                    self.handleLoginError(error)
+
+                    if self.failedAttempts >= 3 {
+                        self.startLockout()
+                    }
+                }
             }
-        } catch {
-            showAlert(message: "Ошибка авторизации")
         }
     }
     
-    private func handleLoginError(_ error: LoginError) {
-        switch error {
-        case .emptyLogin:
-            showAlert(message: "Введите логин")
-        case .emptyPassword:
-            showAlert(message: "Введите пароль")
-        case .invalidCredentials:
-            showAlert(message: "Неверный логин или пароль")
-        case .userNotFound:
-            showAlert(message: "Пользователь не найден")
+    @objc private func signUpButtonTapped() {
+        let email = emailTextField.text ?? ""
+        let password = passwordTextField.text ?? ""
+
+        loginDelegate?.signUp(email: email, password: password) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success():
+                    self?.showAlert(title: "Успешно", message: "Регистрация прошла успешно!")
+                case .failure(let error):
+                    self?.showAlert(message: error.localizedDescription)
+                }
+            }
         }
+    }
+    
+    private func handleLoginError(_ error: Error) {
+        let message = error.localizedDescription
+        showAlert(message: message)
     }
     
     private func startLockout() {
@@ -221,7 +251,7 @@ passwordTextField.text = "1234"
     
     @objc private func bruteForceTapped() {
         bruteForceButton.isEnabled = false
-        bruteForceButton.setTitle("", for: .normal)
+        bruteForceButton.setTitle(" ", for: .normal)
         activityIndicator.startAnimating()
         
         passwordTextField.text = ""
@@ -262,10 +292,14 @@ passwordTextField.text = "1234"
         scrollView.verticalScrollIndicatorInsets = contentInset
     }
     
-    private func showAlert(message: String) {
-        let alert = UIAlertController(title: "Ошибка", message: message, preferredStyle: .alert)
+    private func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
+    }
+    
+    private func showAlert(message: String) {
+        showAlert(title: "Ошибка", message: message)
     }
     
     private func setupView() {
@@ -274,6 +308,7 @@ passwordTextField.text = "1234"
         contentView.addSubview(logoImageView)
         contentView.addSubview(textFieldStackView)
         contentView.addSubview(logInButton)
+        contentView.addSubview(signUpButton)
         contentView.addSubview(bruteForceButton)
     }
 
@@ -307,26 +342,16 @@ passwordTextField.text = "1234"
             logInButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             logInButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             logInButton.heightAnchor.constraint(equalToConstant: 50),
+            
+            signUpButton.topAnchor.constraint(equalTo: bruteForceButton.bottomAnchor, constant: 16),
+            signUpButton.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            signUpButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20),
 
             bruteForceButton.topAnchor.constraint(equalTo: logInButton.bottomAnchor, constant: 16),
             bruteForceButton.leadingAnchor.constraint(equalTo: logInButton.leadingAnchor),
             bruteForceButton.trailingAnchor.constraint(equalTo: logInButton.trailingAnchor),
-            bruteForceButton.heightAnchor.constraint(equalToConstant: 50),
-            bruteForceButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20)
+            bruteForceButton.heightAnchor.constraint(equalToConstant: 50)
         ])
-    }
-    
-    private func attemptLogin(login: String, password: String) throws -> User {
-        guard !login.isEmpty else { throw LoginError.emptyLogin }
-        guard !password.isEmpty else { throw LoginError.emptyPassword }
-        guard loginDelegate?.check(login: login, password: password) == true else {
-            throw LoginError.invalidCredentials
-        }
-        guard let user = userService.getUser(login: login) else {
-            throw LoginError.userNotFound
-        }
-        
-          return user
     }
     
     deinit {
