@@ -65,6 +65,7 @@ class LogInViewController: UIViewController {
         textField.leftViewMode = .always
         textField.textColor = .black
         textField.autocapitalizationType = .none
+        textField.keyboardType = .emailAddress
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
     }()
@@ -210,11 +211,24 @@ passwordTextField.text = "1234"
 
         loginDelegate?.signUp(email: email, password: password) { [weak self] result in
             DispatchQueue.main.async {
+                guard let self = self else { return }
                 switch result {
                 case .success():
-                    self?.showAlert(title: "Успешно", message: "Регистрация прошла успешно!")
+                    self.loginDelegate?.checkCredentials(email: email, password: password) { [weak self] result in
+                        guard let self = self else { return }
+                        DispatchQueue.main.async {
+                            switch result {
+                            case .success():
+                                self.failedAttempts = 0
+                                let profileVC = ProfileViewController()
+                                self.navigationController?.pushViewController(profileVC, animated: true)
+                            case .failure(let error):
+                                self.showAlert(message: "Регистрация успешна, но вход не удался: \(error.localizedDescription)")
+                            }
+                        }
+                    }
                 case .failure(let error):
-                    self?.showAlert(message: error.localizedDescription)
+                    self.showAlert(message: error.localizedDescription)
                 }
             }
         }
