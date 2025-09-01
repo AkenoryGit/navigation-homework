@@ -10,6 +10,7 @@ import UIKit
 class ProfileHeaderView: UIView {
     
     var onAvatarTap: (() -> Void)?
+    var onLogoutTapped: (() -> Void)?
     var avatarImage: UIImage? {
         return avatarImageView.image
     }
@@ -76,6 +77,20 @@ class ProfileHeaderView: UIView {
         return button
     }()
     
+    private let logoutButton: UIButton = {
+        var config = UIButton.Configuration.filled()
+        config.title = "Выйти"
+        config.baseBackgroundColor = .systemBlue
+        config.baseForegroundColor = .white
+        config.cornerStyle = .capsule
+        config.contentInsets = NSDirectionalEdgeInsets(top: 6, leading: 12, bottom: 6, trailing: 12)
+
+        let button = UIButton(configuration: config)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupView()
@@ -100,11 +115,14 @@ class ProfileHeaderView: UIView {
         backgroundColor = .lightGray
         addSubview(avatarImageView)
         addSubview(fullNameLabel)
+        addSubview(logoutButton)
         addSubview(statusLabel)
         addSubview(statusTextField)
         addSubview(setStatusButton)
         
+        logoutButton.addTarget(self, action: #selector(logoutTapped), for: .touchUpInside)
         setStatusButton.addTarget(self, action: #selector(statusButtonTapped), for: .touchUpInside)
+        
         setStatusButton.layer.shadowColor = UIColor.black.cgColor
         setStatusButton.layer.shadowOpacity = 0.25
         setStatusButton.layer.shadowOffset = CGSize(width: 2, height: 2)
@@ -121,6 +139,10 @@ class ProfileHeaderView: UIView {
             fullNameLabel.topAnchor.constraint(equalTo: topAnchor, constant: 12),
             fullNameLabel.leadingAnchor.constraint(equalTo: avatarImageView.trailingAnchor, constant: 16),
             fullNameLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            
+            logoutButton.topAnchor.constraint(equalTo: fullNameLabel.bottomAnchor, constant: 8),
+            logoutButton.leadingAnchor.constraint(equalTo: avatarImageView.trailingAnchor, constant: 16),
+            logoutButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
             
             statusLabel.bottomAnchor.constraint(equalTo: avatarImageView.bottomAnchor, constant: -30),
             statusLabel.leadingAnchor.constraint(equalTo: fullNameLabel.leadingAnchor),
@@ -146,5 +168,9 @@ class ProfileHeaderView: UIView {
     @objc private func avatarTapped() {
         print("Аватар нажат")
         onAvatarTap?()
+    }
+
+    @objc private func logoutTapped() {
+        onLogoutTapped?()
     }
 }

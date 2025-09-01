@@ -7,6 +7,7 @@
 
 import UIKit
 import StorageService
+import RealmSwift
 
 class ProfileViewController: UIViewController {
     
@@ -66,13 +67,16 @@ class ProfileViewController: UIViewController {
         profileHeaderView.onAvatarTap = { [weak self] in
             self?.animateAvatarExpansion()
         }
+        profileHeaderView.onLogoutTapped = { [weak self] in
+            self?.logoutButtonTapped()
+        }
         
         closeButton.addTarget(self, action: #selector(closeButtonTapped), for: .touchUpInside)
         
         if let user = user {
             title = user.fullName
             profileHeaderView.avatarImageView.image = user.avatar
-            profileHeaderView.fullNameLabel.text = user.fullName
+            profileHeaderView.fullNameLabel.text = user.login
             profileHeaderView.statusLabel.text = user.status
         }
     }
@@ -170,6 +174,21 @@ class ProfileViewController: UIViewController {
                 self.avatarSnapshotView = nil
             })
         })
+    }
+    
+    @objc private func logoutButtonTapped() {
+        do {
+            let realm = try Realm()
+            try realm.write {
+                realm.delete(realm.objects(UserRealm.self))
+            }
+        } catch {
+            print("Ошибка при удалении пользователя из Realm: \(error.localizedDescription)")
+        }
+
+        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
+            sceneDelegate.showLoginScreen()
+        }
     }
 }
     

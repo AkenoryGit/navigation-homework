@@ -7,10 +7,10 @@
 
 import UIKit
 import FirebaseAuth
+import RealmSwift
 
 class LogInViewController: UIViewController {
     
-    var loginDelegate: LoginViewControllerDelegate?
     var onLoginSuccess: ((User) -> Void)?
     
     private var failedAttempts = 0
@@ -120,9 +120,11 @@ class LogInViewController: UIViewController {
     }()
 
     private let userService: UserService
+    private let loginDelegate: LoginViewControllerDelegate
 
-    init(userService: UserService) {
+    init(userService: UserService, loginDelegate: LoginViewControllerDelegate) {
         self.userService = userService
+        self.loginDelegate = loginDelegate
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -133,12 +135,18 @@ class LogInViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        let savedLogin = UserDefaults.standard.string(forKey: "lastLogin")
+        let savedPassword = UserDefaults.standard.string(forKey: "lastPassword")
+
+        emailTextField.text = savedLogin
+        passwordTextField.text = savedPassword
+        
 #if DEBUG
-emailTextField.text = "test"
+//emailTextField.text = "test@gmail.com"
 #else
-emailTextField.text = "cat"
+//emailTextField.text = "cat"
 #endif
-passwordTextField.text = "1234"
+//passwordTextField.text = "123456"
 
         view.backgroundColor = .white
         navigationController?.navigationBar.isHidden = true
@@ -184,15 +192,36 @@ passwordTextField.text = "1234"
             return
         }
 
-        loginDelegate?.checkCredentials(email: email, password: password) { [weak self] result in
+        loginDelegate.checkCredentials(email: email, password: password) { [weak self] result in
             DispatchQueue.main.async {
                 guard let self = self else { return }
                 switch result {
                 case .success():
                     self.failedAttempts = 0
+
+                    let userRealm = UserRealm()
+                    userRealm.login = email
+                    userRealm.password = password
+                    
+                    print("Пробуем сохранить в Realm: \(email) / \(password)")
+
+                    do {
+                        let realm = try Realm()
+                        try realm.write {
+                            realm.delete(realm.objects(UserRealm.self))
+                            realm.add(userRealm)
+                        }
+                        print("Успешно сохранено в Realm!")
+                    } catch {
+                        print("Ошибка при сохранении в Realm: \(error.localizedDescription)")
+                    }
+
                     print("Успешный вход!")
-                    let profileVC = ProfileViewController()
-                    self.navigationController?.pushViewController(profileVC, animated: true)
+                    let placeholderImage = UIImage(systemName: "person.crop.circle")!
+                    let user = User(login: email, fullName: email, avatar: placeholderImage, status: "Online")
+                    UserDefaults.standard.set(email, forKey: "lastLogin")
+                    UserDefaults.standard.set(password, forKey: "lastPassword")
+                    self.onLoginSuccess?(user)
                 case .failure(let error):
                     self.failedAttempts += 1
                     self.handleLoginError(error)
@@ -209,19 +238,19 @@ passwordTextField.text = "1234"
         let email = emailTextField.text ?? ""
         let password = passwordTextField.text ?? ""
 
-        loginDelegate?.signUp(email: email, password: password) { [weak self] result in
+        loginDelegate.signUp(email: email, password: password) { [weak self] result in
             DispatchQueue.main.async {
                 guard let self = self else { return }
                 switch result {
                 case .success():
-                    self.loginDelegate?.checkCredentials(email: email, password: password) { [weak self] result in
+                    self.loginDelegate.checkCredentials(email: email, password: password) { [weak self] result in
                         guard let self = self else { return }
                         DispatchQueue.main.async {
                             switch result {
                             case .success():
                                 self.failedAttempts = 0
-                                let profileVC = ProfileViewController()
-                                self.navigationController?.pushViewController(profileVC, animated: true)
+                                let user = User(login: email, fullName: email, avatar: UIImage(named: "default_avatar")!, status: "Online")
+                                self.onLoginSuccess?(user)
                             case .failure(let error):
                                 self.showAlert(message: "Регистрация успешна, но вход не удался: \(error.localizedDescription)")
                             }

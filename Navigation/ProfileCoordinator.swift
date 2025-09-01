@@ -11,27 +11,32 @@ final class ProfileCoordinator {
     let navigationController = UINavigationController()
 
     func start() {
-    #if DEBUG
+        #if DEBUG
         let userService = TestUserService()
-    #else
+        #else
         let userService = CurrentUserService(user: User(
             login: "cat",
             fullName: "Hipster Cat",
             avatar: UIImage(named: "cat") ?? UIImage(),
             status: "Waiting for something..."
         ))
-    #endif
+        #endif
 
         let loginFactory = MyLoginFactory()
         let loginInspector = loginFactory.makeLoginInspector()
 
-        let loginVC = LogInViewController(userService: userService)
-        loginVC.loginDelegate = loginInspector
+        let loginVC = LogInViewController(userService: userService, loginDelegate: loginInspector)
         loginVC.onLoginSuccess = { [weak self] user in
             self?.showProfile(user: user)
         }
 
         navigationController.viewControllers = [loginVC]
+    }
+
+    func start(with user: User) {
+        let profileVC = ProfileViewController()
+        profileVC.user = user
+        navigationController.setViewControllers([profileVC], animated: false)
     }
 
     private func showProfile(user: User) {

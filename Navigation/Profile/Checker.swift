@@ -15,8 +15,8 @@ final class Checker {
     
     private init() {
 #if DEBUG
-        self.validLogin = "test"
-        self.validPassword = "1234"
+        self.validLogin = "test@gmail.com"
+        self.validPassword = "123456"
 #else
         self.validLogin = "cat"
         self.validPassword = "1234"

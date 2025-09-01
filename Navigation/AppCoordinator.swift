@@ -5,8 +5,8 @@
 //  Created by Дмитрий Дудник on 22.07.2025.
 //
 
-
 import UIKit
+import RealmSwift
 
 final class AppCoordinator {
     private let window: UIWindow
@@ -22,27 +22,29 @@ final class AppCoordinator {
     }
 
     func start() {
-        switch configuration {
-        case .people:
-            NetworkService.request(url: AppConfiguration.people.url) { (people: [Person]) in
-                print("Загружено людей: \(people.count)")
+        do {
+            let realm = try Realm()
+            if let savedUser = realm.objects(UserRealm.self).first {
+                print("Найден сохранённый пользователь: \(savedUser.login)")
+                let user = User(
+                    login: savedUser.login,
+                    fullName: savedUser.login,
+                    avatar: UIImage(named: "cat") ?? UIImage(),
+                    status: "Автовход"
+                )
+                launchTabBarFlow(savedUser: user)
+            } else {
+                launchLoginFlow()
             }
-        case .starships:
-            NetworkService.request(url: AppConfiguration.starships.url) { (starships: [Starship]) in
-                print("Загружено кораблей: \(starships.count)")
-            }
-        case .planets:
-            NetworkService.request(url: AppConfiguration.planets.url) { (planets: [Planet]) in
-                print("Загружено планет: \(planets.count)")
-            }
-        case .todos:
-            NetworkService.request(url: AppConfiguration.todos.url) { (todos: [TodoItem]) in
-                print("Загружено задач: \(todos.count)")
-            }
+        } catch {
+            print("Ошибка при работе с Realm: \(error.localizedDescription)")
+            launchLoginFlow()
         }
+    }
 
+    private func launchTabBarFlow(savedUser: User) {
         feedCoordinator.setup()
-        profileCoordinator.start()
+        profileCoordinator.start(with: savedUser)
 
         profileCoordinator.navigationController.tabBarItem = UITabBarItem(
             title: "Профиль",
@@ -51,11 +53,26 @@ final class AppCoordinator {
         )
 
         tabBarController.viewControllers = [
-            feedCoordinator.controller,
-            profileCoordinator.navigationController
+            profileCoordinator.navigationController,
+            feedCoordinator.controller
         ]
 
         window.rootViewController = tabBarController
+        window.makeKeyAndVisible()
+    }
+
+    private func launchLoginFlow() {
+        let checkerService = CheckerService()
+        let inspector = LoginInspector(checkerService: checkerService)
+        let userService = TestUserService()
+
+        let loginVC = LogInViewController(userService: userService, loginDelegate: inspector)
+        loginVC.onLoginSuccess = { [weak self] user in
+            self?.launchTabBarFlow(savedUser: user)
+        }
+
+        let navController = UINavigationController(rootViewController: loginVC)
+        window.rootViewController = navController
         window.makeKeyAndVisible()
     }
 }

@@ -13,6 +13,7 @@ protocol LoginFactory {
 
 struct MyLoginFactory: LoginFactory {
     func makeLoginInspector() -> LoginViewControllerDelegate {
-        return LoginInspector()
+        let checkerService = CheckerService()
+        return LoginInspector(checkerService: checkerService)
     }
 }

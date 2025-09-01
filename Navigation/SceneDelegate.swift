@@ -55,6 +55,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
     }
+    
+    func showLoginScreen() {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { return }
+
+        let window = UIWindow(windowScene: windowScene)
+        self.window = window
+
+        let coordinator = AppCoordinator(window: window, configuration: appConfiguration)
+        self.appCoordinator = coordinator
+        coordinator.start()
+    }
 
 }
 
