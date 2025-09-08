@@ -6,10 +6,16 @@
 //
 
 import UIKit
-import StorageService
 import iOSIntPackage
 
+protocol PostTableViewCellDelegate: AnyObject {
+    func didDoubleTap(postId: String)
+}
+
 class PostTableViewCell: UITableViewCell {
+    
+    weak var delegate: PostTableViewCellDelegate?
+    private var postId: String?
     
     private let postImageView = UIImageView()
     private let authorLabel = UILabel()
@@ -21,15 +27,19 @@ class PostTableViewCell: UITableViewCell {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupViews()
         setupConstraints()
+        setupDoubleTapGesture()
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         setupViews()
         setupConstraints()
+        setupDoubleTapGesture()
     }
 
     func configure(with post: ProfilePost) {
+        self.postId = post.id
+        
         authorLabel.text = post.author
         descriptionLabel.text = post.description
         likesLabel.text = "Likes: \(post.likes)"
@@ -97,4 +107,16 @@ class PostTableViewCell: UITableViewCell {
             viewsLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
         ])
     }
+    
+    private func setupDoubleTapGesture() {
+        let doubleTap = UITapGestureRecognizer(target: self, action: #selector(handleDoubleTap))
+        doubleTap.numberOfTapsRequired = 2
+        contentView.addGestureRecognizer(doubleTap)
+    }
+
+    @objc private func handleDoubleTap() {
+        guard let id = postId else { return }
+        delegate?.didDoubleTap(postId: id)
+    }
 }
+

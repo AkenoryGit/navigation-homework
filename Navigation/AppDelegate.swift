@@ -8,11 +8,20 @@
 import UIKit
 import Firebase
 import FirebaseCore
+import CoreData
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
-
+    
+    lazy var persistentContainer: NSPersistentContainer = {
+        let container = NSPersistentContainer(name: "FavoritePostModel")
+        container.loadPersistentStores(completionHandler: { (_, error) in
+            if let error = error as NSError? {
+                fatalError("Ошибка при загрузке хранилища: \(error), \(error.userInfo)")
+            }
+        })
+        return container
+    }()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
@@ -35,4 +44,5 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
 }
+
 

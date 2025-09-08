@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import StorageService
 import RealmSwift
 
 class ProfileViewController: UIViewController {
@@ -233,6 +232,7 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
             let postIndex = indexPath.row - 4
             if postIndex >= 0 && postIndex < posts.count {
                 cell.configure(with: posts[postIndex])
+                cell.delegate = self
             }
             return cell
         }
@@ -243,3 +243,28 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
+extension ProfileViewController: PostTableViewCellDelegate {
+    func didDoubleTap(postId: String) {
+        if let tappedPost = posts.first(where: { $0.id == postId }) {
+            print("Пост с id \(postId) добавлен в избранное")
+
+            guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
+            let context = appDelegate.persistentContainer.viewContext
+
+            let savedPost = SavedPost(context: context)
+            savedPost.id = tappedPost.id
+            savedPost.author = tappedPost.author
+            savedPost.text = tappedPost.description
+            savedPost.imageName = tappedPost.image
+            savedPost.likes = Int64(tappedPost.likes)
+            savedPost.views = Int64(tappedPost.views)
+
+            do {
+                try context.save()
+                print("Пост сохранён в избранное")
+            } catch {
+                print("Ошибка сохранения: \(error)")
+            }
+        }
+    }
+}

@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import StorageService
 
 protocol Coordinator: AnyObject {
     var controller: UIViewController { get }
