@@ -18,6 +18,11 @@ class FavoritesViewController: UIViewController {
 
         title = "Избранное"
         view.backgroundColor = .white
+        
+        navigationItem.rightBarButtonItems = [
+            UIBarButtonItem(title: "Сбросить", style: .plain, target: self, action: #selector(resetFilter)),
+            UIBarButtonItem(title: "Поиск", style: .plain, target: self, action: #selector(showAuthorSearchAlert))
+        ]
 
         setupTableView()
         fetchSavedPosts()
@@ -36,11 +41,15 @@ class FavoritesViewController: UIViewController {
         view.addSubview(tableView)
     }
 
-    private func fetchSavedPosts() {
+    private func fetchSavedPosts(filterByAuthor: String? = nil) {
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
         let context = appDelegate.persistentContainer.viewContext
 
         let fetchRequest: NSFetchRequest<SavedPost> = SavedPost.fetchRequest()
+
+        if let author = filterByAuthor {
+            fetchRequest.predicate = NSPredicate(format: "author CONTAINS[cd] %@", author)
+        }
 
         do {
             savedPosts = try context.fetch(fetchRequest)
@@ -48,6 +57,26 @@ class FavoritesViewController: UIViewController {
         } catch {
             print("Не удалось загрузить посты: \(error.localizedDescription)")
         }
+    }
+    
+    @objc private func showAuthorSearchAlert() {
+        let alert = UIAlertController(title: "Поиск по автору", message: "Введите имя автора", preferredStyle: .alert)
+        alert.addTextField()
+
+        let searchAction = UIAlertAction(title: "Найти", style: .default) { [weak self] _ in
+            guard let self = self else { return }
+            if let author = alert.textFields?.first?.text, !author.isEmpty {
+                self.fetchSavedPosts(filterByAuthor: author)
+            }
+        }
+
+        alert.addAction(searchAction)
+        alert.addAction(UIAlertAction(title: "Отмена", style: .cancel))
+        present(alert, animated: true)
+    }
+
+    @objc private func resetFilter() {
+        fetchSavedPosts()
     }
 }
 
@@ -80,24 +109,36 @@ extension FavoritesViewController: UITableViewDataSource {
 }
 
 extension FavoritesViewController: UITableViewDelegate {
-    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle,
-                   forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            let postToDelete = savedPosts[indexPath.row]
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let deleteAction = UIContextualAction(style: .destructive, title: "Удалить") { [weak self] _, _, completion in
+            guard let self = self else { return }
+            let postToDelete = self.savedPosts[indexPath.row]
 
             guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
-            let context = appDelegate.persistentContainer.viewContext
+            let backgroundContext = appDelegate.persistentContainer.newBackgroundContext()
+            backgroundContext.perform {
+                if let objectID = postToDelete.objectID as? NSManagedObjectID,
+                   let backgroundPost = try? backgroundContext.existingObject(with: objectID) {
+                    backgroundContext.delete(backgroundPost)
 
-            context.delete(postToDelete)
-
-            do {
-                try context.save()
-                savedPosts.remove(at: indexPath.row)
-                tableView.deleteRows(at: [indexPath], with: .automatic)
-            } catch {
-                print("Ошибка при удалении поста: \(error.localizedDescription)")
+                    do {
+                        try backgroundContext.save()
+                        DispatchQueue.main.async {
+                            self.savedPosts.remove(at: indexPath.row)
+                            tableView.deleteRows(at: [indexPath], with: .automatic)
+                            completion(true)
+                        }
+                    } catch {
+                        print("Ошибка удаления в backgroundContext: \(error)")
+                        DispatchQueue.main.async {
+                            completion(false)
+                        }
+                    }
+                }
             }
         }
+
+        return UISwipeActionsConfiguration(actions: [deleteAction])
     }
 }
 

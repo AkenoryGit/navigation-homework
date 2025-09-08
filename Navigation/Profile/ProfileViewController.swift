@@ -249,21 +249,22 @@ extension ProfileViewController: PostTableViewCellDelegate {
             print("Пост с id \(postId) добавлен в избранное")
 
             guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
-            let context = appDelegate.persistentContainer.viewContext
+            let backgroundContext = appDelegate.persistentContainer.newBackgroundContext()
+            backgroundContext.perform {
+                let savedPost = SavedPost(context: backgroundContext)
+                savedPost.id = tappedPost.id
+                savedPost.author = tappedPost.author
+                savedPost.text = tappedPost.description
+                savedPost.imageName = tappedPost.image
+                savedPost.likes = Int64(tappedPost.likes)
+                savedPost.views = Int64(tappedPost.views)
 
-            let savedPost = SavedPost(context: context)
-            savedPost.id = tappedPost.id
-            savedPost.author = tappedPost.author
-            savedPost.text = tappedPost.description
-            savedPost.imageName = tappedPost.image
-            savedPost.likes = Int64(tappedPost.likes)
-            savedPost.views = Int64(tappedPost.views)
-
-            do {
-                try context.save()
-                print("Пост сохранён в избранное")
-            } catch {
-                print("Ошибка сохранения: \(error)")
+                do {
+                    try backgroundContext.save()
+                    print("Пост сохранён в backgroundContext")
+                } catch {
+                    print("Ошибка сохранения в backgroundContext: \(error)")
+                }
             }
         }
     }

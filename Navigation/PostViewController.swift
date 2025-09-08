@@ -48,21 +48,23 @@ class PostViewController: UIViewController {
     private func savePostToCoreData(_ post: ProfilePost) {
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
 
-        let context = appDelegate.persistentContainer.viewContext
-        let savedPost = SavedPost(context: context)
+        let backgroundContext = appDelegate.persistentContainer.newBackgroundContext()
 
-        savedPost.id = post.id
-        savedPost.author = post.author
-        savedPost.text = post.description
-        savedPost.imageName = post.image
-        savedPost.likes = Int64(post.likes)
-        savedPost.views = Int64(post.views)
+        backgroundContext.perform {
+            let savedPost = SavedPost(context: backgroundContext)
+            savedPost.id = post.id
+            savedPost.author = post.author
+            savedPost.text = post.description
+            savedPost.imageName = post.image
+            savedPost.likes = Int64(post.likes)
+            savedPost.views = Int64(post.views)
 
-        do {
-            try context.save()
-            print("Пост сохранён: \(post.description)")
-        } catch {
-            print("Ошибка сохранения поста: \(error.localizedDescription)")
+            do {
+                try backgroundContext.save()
+                print("Пост сохранён в фоне: \(post.description)")
+            } catch {
+                print("Ошибка сохранения поста в фоне: \(error.localizedDescription)")
+            }
         }
     }
 }
