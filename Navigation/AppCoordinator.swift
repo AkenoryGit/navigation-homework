@@ -55,10 +55,15 @@ final class AppCoordinator {
         let favoritesVC = FavoritesViewController()
         let favoritesNav = UINavigationController(rootViewController: favoritesVC)
         favoritesNav.tabBarItem = UITabBarItem(title: "Избранное", image: UIImage(systemName: "star"), tag: 2)
+        
+        let mapVC = MapViewController()
+        let mapNav = UINavigationController(rootViewController: mapVC)
+        mapNav.tabBarItem = UITabBarItem(title: "Карта", image: UIImage(systemName: "map"), tag: 3)
 
         tabBarController.viewControllers = [
             profileCoordinator.navigationController,
             feedCoordinator.controller,
+            mapNav,
             favoritesNav
         ]
 
