@@ -61,11 +61,6 @@
 			path = Navigation;
 			sourceTree = "<group>";
 		};
-		D0D65B892EA5F84600B5E06B /* NavigationTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = NavigationTests;
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -93,7 +88,6 @@
 			isa = PBXGroup;
 			children = (
 				D06489352DC9E41800FC9EDB /* Navigation */,
-				D0D65B892EA5F84600B5E06B /* NavigationTests */,
 				D06489342DC9E41800FC9EDB /* Products */,
 			);
 			sourceTree = "<group>";
@@ -148,9 +142,6 @@
 			);
 			dependencies = (
 				D0D65B8D2EA5F84600B5E06B /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				D0D65B892EA5F84600B5E06B /* NavigationTests */,
 			);
 			name = NavigationTests;
 			packageProductDependencies = (

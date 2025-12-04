@@ -7,24 +7,28 @@
 
 import UIKit
 
-class ProfileHeaderView: UIView {
+final class ProfileHeaderView: UIView {
+    
+    // MARK: - Callbacks
     
     var onAvatarTap: (() -> Void)?
     var onLogoutTapped: (() -> Void)?
+    
+    // MARK: - Public avatar accessors (для анимации в ProfileViewController)
+    
     var avatarImage: UIImage? {
-        return avatarImageView.image
+        avatarImageView.image
     }
 
     var avatarFrame: CGRect {
-        return avatarImageView.frame
+        avatarImageView.frame
     }
 
     var avatarCornerRadius: CGFloat {
-        return avatarImageView.layer.cornerRadius
+        avatarImageView.layer.cornerRadius
     }
     
-    private var statusTextFieldTopConstraint: NSLayoutConstraint!
-    private var statusButtonTopConstraint: NSLayoutConstraint!
+    // MARK: - UI
     
     let avatarImageView: UIImageView = {
         let imageView = UIImageView()
@@ -32,38 +36,44 @@ class ProfileHeaderView: UIView {
         imageView.layer.cornerRadius = 75
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 3
-        imageView.layer.borderColor = UIColor.white.cgColor
+        imageView.layer.borderColor = AppColors.background.cgColor
         imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.contentMode = .scaleAspectFill
         return imageView
     }()
     
     let fullNameLabel: UILabel = {
         let label = UILabel()
         label.text = "Hipster Cat"
-        label.font = UIFont.boldSystemFont(ofSize: 18)
+        label.font = AppFonts.title3()
+        label.textColor = AppColors.textPrimary
         label.translatesAutoresizingMaskIntoConstraints = false
+        label.numberOfLines = 1
         return label
     }()
     
     let statusLabel: UILabel = {
         let label = UILabel()
         label.text = "Waiting for something..."
-        label.textColor = .gray
-        label.font = UIFont.systemFont(ofSize: 14)
+        label.textColor = AppColors.textSecondary
+        label.font = AppFonts.caption()
         label.translatesAutoresizingMaskIntoConstraints = false
+        label.numberOfLines = 2
         return label
     }()
     
     private let statusTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Enter new status..."
-        textField.backgroundColor = .white
+        textField.backgroundColor = AppColors.background
         textField.layer.borderWidth = 1
-        textField.layer.borderColor = UIColor.gray.cgColor
+        textField.layer.borderColor = AppColors.separator.cgColor
         textField.layer.cornerRadius = 8
-        textField.font = UIFont.systemFont(ofSize: 14)
+        textField.font = AppFonts.caption()
+        textField.textColor = AppColors.textPrimary
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.isHidden = false
+        leftPadding(for: textField, width: 8)
         return textField
     }()
     
@@ -71,25 +81,34 @@ class ProfileHeaderView: UIView {
         let button = UIButton(type: .system)
         button.setTitle("Show Status", for: .normal)
         button.setTitleColor(.white, for: .normal)
-        button.backgroundColor = .systemBlue
+        button.titleLabel?.font = AppFonts.bodyBold()
+        button.backgroundColor = AppColors.buttonBlue
         button.layer.cornerRadius = 10
         button.translatesAutoresizingMaskIntoConstraints = false
+        
+        button.layer.shadowColor = UIColor.black.cgColor
+        button.layer.shadowOpacity = 0.25
+        button.layer.shadowOffset = CGSize(width: 2, height: 2)
+        button.layer.shadowRadius = 4
+        
         return button
     }()
     
     private let logoutButton: UIButton = {
         var config = UIButton.Configuration.filled()
         config.title = "Выйти"
-        config.baseBackgroundColor = .systemBlue
+        config.baseBackgroundColor = AppColors.buttonBlue
         config.baseForegroundColor = .white
         config.cornerStyle = .capsule
         config.contentInsets = NSDirectionalEdgeInsets(top: 6, leading: 12, bottom: 6, trailing: 12)
 
         let button = UIButton(configuration: config)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+        button.titleLabel?.font = AppFonts.captionBold()
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
+    
+    // MARK: - Init
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -105,6 +124,8 @@ class ProfileHeaderView: UIView {
         setupConstraints()
     }
     
+    // MARK: - Setup
+    
     private func setupGesture() {
         avatarImageView.isUserInteractionEnabled = true
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(avatarTapped))
@@ -112,7 +133,8 @@ class ProfileHeaderView: UIView {
     }
     
     private func setupView() {
-        backgroundColor = .lightGray
+        backgroundColor = AppColors.secondaryBackground
+        
         addSubview(avatarImageView)
         addSubview(fullNameLabel)
         addSubview(logoutButton)
@@ -122,11 +144,6 @@ class ProfileHeaderView: UIView {
         
         logoutButton.addTarget(self, action: #selector(logoutTapped), for: .touchUpInside)
         setStatusButton.addTarget(self, action: #selector(statusButtonTapped), for: .touchUpInside)
-        
-        setStatusButton.layer.shadowColor = UIColor.black.cgColor
-        setStatusButton.layer.shadowOpacity = 0.25
-        setStatusButton.layer.shadowOffset = CGSize(width: 2, height: 2)
-        setStatusButton.layer.shadowRadius = 4
     }
     
     private func setupConstraints() {
@@ -142,7 +159,7 @@ class ProfileHeaderView: UIView {
             
             logoutButton.topAnchor.constraint(equalTo: fullNameLabel.bottomAnchor, constant: 8),
             logoutButton.leadingAnchor.constraint(equalTo: avatarImageView.trailingAnchor, constant: 16),
-            logoutButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            logoutButton.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -16),
             
             statusLabel.bottomAnchor.constraint(equalTo: avatarImageView.bottomAnchor, constant: -30),
             statusLabel.leadingAnchor.constraint(equalTo: fullNameLabel.leadingAnchor),
@@ -155,22 +172,32 @@ class ProfileHeaderView: UIView {
 
             setStatusButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             setStatusButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            setStatusButton.topAnchor.constraint(equalTo: statusTextField.bottomAnchor, constant: 4),
+            setStatusButton.topAnchor.constraint(equalTo: statusTextField.bottomAnchor, constant: 8),
             setStatusButton.heightAnchor.constraint(equalToConstant: 44),
             setStatusButton.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16)
         ])
     }
     
+    // MARK: - Actions
+    
     @objc private func statusButtonTapped() {
-            statusLabel.text = statusTextField.text?.isEmpty == false ? statusTextField.text : "Waiting for something..."
+        let text = statusTextField.text
+        statusLabel.text = (text?.isEmpty == false) ? text : "Waiting for something..."
     }
     
     @objc private func avatarTapped() {
-        print("Аватар нажат")
         onAvatarTap?()
     }
 
     @objc private func logoutTapped() {
         onLogoutTapped?()
+    }
+    
+    // MARK: - Helpers
+    
+    private static func leftPadding(for textField: UITextField, width: CGFloat) {
+        let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: width, height: 0))
+        textField.leftView = paddingView
+        textField.leftViewMode = .always
     }
 }

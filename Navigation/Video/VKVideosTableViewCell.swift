@@ -1,22 +1,22 @@
 //
-//  MusicPlayerTableViewCell.swift
+//  VKVideosTableViewCell.swift
 //  Navigation
 //
-//  Created by Дмитрий Дудник on 13.08.2025.
+//  Created by Дмитрий Дудник on 01.12.2025.
 //
 
 import UIKit
 
-final class MusicPlayerTableViewCell: UITableViewCell {
+final class VKVideosTableViewCell: UITableViewCell {
 
-    static let identifier = "MusicPlayerTableViewCell"
+    static let identifier = "VKVideosTableViewCell"
 
-    /// Колбэк, который вызывается при тапе по ячейке
-    var onOpenMusic: (() -> Void)?
+    /// Колбэк, который дергаем при тапе по ячейке
+    var onOpenVKVideos: (() -> Void)?
 
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Музыка"
+        label.text = "VK Видео"
         label.font = AppFonts.bodyBold()
         label.textColor = AppColors.textPrimary
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -25,7 +25,7 @@ final class MusicPlayerTableViewCell: UITableViewCell {
 
     private let subtitleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Все треки и избранное"
+        label.text = "Смотреть и добавлять ролики из VK"
         label.font = AppFonts.caption()
         label.textColor = AppColors.textSecondary
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -39,6 +39,8 @@ final class MusicPlayerTableViewCell: UITableViewCell {
         sv.translatesAutoresizingMaskIntoConstraints = false
         return sv
     }()
+
+    // MARK: - Init
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -61,11 +63,13 @@ final class MusicPlayerTableViewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
+    // MARK: - Selection
+
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 
         if selected {
-            onOpenMusic?()
+            onOpenVKVideos?()
         }
     }
 }
