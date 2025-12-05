@@ -425,7 +425,7 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
                 }
 
                 // Подменяем author у постов текущего пользователя на актуальный nickname
-                if let login = user?.login,
+                if user?.login != nil,
                    userPosts.contains(where: { $0.id == post.id }) {
                     post = ProfilePost(
                         id: post.id,

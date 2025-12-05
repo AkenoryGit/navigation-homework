@@ -146,7 +146,7 @@ final class VKVideosViewController: UIViewController {
 
             let title = titleText?.isEmpty == false ? titleText! : "VK Video"
 
-            var newVideo = VKVideo(
+            let newVideo = VKVideo(
                 id: UUID().uuidString,
                 title: title,
                 urlString: url.absoluteString,

@@ -28,18 +28,24 @@ final class MapViewController: UIViewController {
     }()
 
     private let locationButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("Моё местоположение", for: .normal)
+        var config = UIButton.Configuration.filled()
+        config.title = "Моё местоположение"
+        config.baseBackgroundColor = AppColors.buttonBlue
+        config.baseForegroundColor = .white
+        config.cornerStyle = .medium
+        config.contentInsets = NSDirectionalEdgeInsets(
+            top: 10, leading: 16, bottom: 10, trailing: 16
+        )
+
+        let button = UIButton(configuration: config)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.titleLabel?.font = AppFonts.bodyBold()
-        button.setTitleColor(.white, for: .normal)
-        button.backgroundColor = AppColors.buttonBlue
-        button.layer.cornerRadius = 10
-        button.contentEdgeInsets = UIEdgeInsets(top: 10, left: 16, bottom: 10, right: 16)
+
+        // Тень остаётся через CALayer (она не устарела)
         button.layer.shadowColor = UIColor.black.cgColor
         button.layer.shadowOpacity = 0.2
         button.layer.shadowRadius = 4
         button.layer.shadowOffset = CGSize(width: 0, height: 2)
+
         return button
     }()
 

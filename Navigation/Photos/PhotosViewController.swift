@@ -371,7 +371,6 @@ final class PhotosViewController: UIViewController,
 
     @objc private func closeFullscreenTapped() {
         guard
-            let window = view.window,
             let imageView = fullscreenImageView,
             let overlay = fullscreenOverlayView
         else { return }

@@ -14,8 +14,7 @@ class LocalNotificationsService {
         let center = UNUserNotificationCenter.current()
         let options: UNAuthorizationOptions = [.sound, .badge, .alert]
         
-        center.requestAuthorization(options: options) { [weak self] (granted, error) in
-            guard let self = self else { return }
+        center.requestAuthorization(options: options) { granted, error in
             if granted {
                 print("Разрешение на уведомления получено")
                 
@@ -28,11 +27,19 @@ class LocalNotificationsService {
                 var dateComponents = DateComponents()
                 dateComponents.hour = 19
                 dateComponents.minute = 0
-                let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+
+                let trigger = UNCalendarNotificationTrigger(
+                    dateMatching: dateComponents,
+                    repeats: true
+                )
                 
-                let request = UNNotificationRequest(identifier: "dailyUpdates", content: content, trigger: trigger)
+                let request = UNNotificationRequest(
+                    identifier: "dailyUpdates",
+                    content: content,
+                    trigger: trigger
+                )
                 
-                center.add(request) { (error) in
+                center.add(request) { error in
                     if let error = error {
                         print("Ошибка при регистрации уведомления: \(error.localizedDescription)")
                     } else {
