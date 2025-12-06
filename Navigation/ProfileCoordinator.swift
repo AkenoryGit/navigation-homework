@@ -7,36 +7,28 @@
 
 import UIKit
 
+/// Координатор экрана профиля
 final class ProfileCoordinator {
-    let navigationController = UINavigationController()
 
-    func start() {
-    #if DEBUG
-        let userService = TestUserService()
-    #else
-        let userService = CurrentUserService(user: User(
-            login: "cat",
-            fullName: "Hipster Cat",
-            avatar: UIImage(named: "cat") ?? UIImage(),
-            status: "Waiting for something..."
-        ))
-    #endif
+    // MARK: - Public
 
-        let loginFactory = MyLoginFactory()
-        let loginInspector = loginFactory.makeLoginInspector()
+    /// Навигационный контроллер с профилем
+    private(set) var controller: UINavigationController = UINavigationController()
 
-        let loginVC = LogInViewController(userService: userService)
-        loginVC.loginDelegate = loginInspector
-        loginVC.onLoginSuccess = { [weak self] user in
-            self?.showProfile(user: user)
-        }
+    /// Колбэк, который должен вызывать переход к экрану логина
+    var onLogout: (() -> Void)?
 
-        navigationController.viewControllers = [loginVC]
-    }
+    // MARK: - Public methods
 
-    private func showProfile(user: User) {
+    func start(with user: User) {
         let profileVC = ProfileViewController()
         profileVC.user = user
-        navigationController.setViewControllers([profileVC], animated: true)
+
+        // Пробрасываем событие "Выйти" выше, в координатор
+        profileVC.onLogout = { [weak self] in
+            self?.onLogout?()
+        }
+
+        controller = UINavigationController(rootViewController: profileVC)
     }
 }
